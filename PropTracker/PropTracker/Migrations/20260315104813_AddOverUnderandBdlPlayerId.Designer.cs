@@ -12,8 +12,8 @@ using PropTracker.Models;
 namespace PropTracker.Migrations
 {
     [DbContext(typeof(PropContext))]
-    [Migration("20260315101450_Addresulttracking")]
-    partial class Addresulttracking
+    [Migration("20260315104813_AddOverUnderandBdlPlayerId")]
+    partial class AddOverUnderandBdlPlayerId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -263,6 +263,12 @@ namespace PropTracker.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("BdlPlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OverUnder")
+                        .HasColumnType("int");
 
                     b.Property<int>("ParlayId")
                         .HasColumnType("int");

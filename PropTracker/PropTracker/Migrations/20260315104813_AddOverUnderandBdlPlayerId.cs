@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PropTracker.Migrations
 {
     /// <inheritdoc />
-    public partial class initDbCreation : Migration
+    public partial class AddOverUnderandBdlPlayerId : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -57,7 +57,9 @@ namespace PropTracker.Migrations
                     ParlayId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Multi = table.Column<double>(type: "float", nullable: false),
-                    PropId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    PropId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Result = table.Column<int>(type: "int", nullable: false),
+                    HitAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -180,7 +182,10 @@ namespace PropTracker.Migrations
                     PlayerLastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PropType = table.Column<int>(type: "int", nullable: false),
                     PropValue = table.Column<double>(type: "float", nullable: false),
+                    OverUnder = table.Column<int>(type: "int", nullable: false),
                     ParlayId = table.Column<int>(type: "int", nullable: false),
+                    Result = table.Column<int>(type: "int", nullable: false),
+                    BdlPlayerId = table.Column<int>(type: "int", nullable: false),
                     ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PropTracker.Models;
 using Microsoft.AspNetCore.Identity;
 using PropTracker.Services;
@@ -59,13 +59,6 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpClient<NbaStatsService>();
 builder.Services.AddRazorPages();
 builder.Services.AddDistributedMemoryCache();
-// Configure routing before building the app
-builder.Services.AddRouting(options =>
-{
-    options.LowercaseUrls = true;
-    options.AppendTrailingSlash = true;
-});
-
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -73,6 +66,11 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+builder.Services.AddRouting(options =>
+{
+    options.LowercaseUrls = true;
+    options.AppendTrailingSlash = true;
+});
 
 app.UseStaticFiles();
 app.UseRouting();

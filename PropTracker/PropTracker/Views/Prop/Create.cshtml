@@ -1,4 +1,4 @@
-﻿@model Prop
+﻿@model PropTracker.Models.Prop
 @using PropTracker.Models
 
 @{
@@ -27,6 +27,8 @@
             --red: #ff4d6d;
             --error-bg: rgba(255,77,109,0.08);
             --error-border: rgba(255,77,109,0.4);
+            --over: #00e5a0;
+            --under: #ff4d6d;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,7 +40,6 @@
             min-height: 100vh;
         }
 
-        /* NAV */
         nav {
             display: flex;
             align-items: center;
@@ -63,18 +64,8 @@
             text-decoration: none;
         }
 
-        .logo-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 28px;
-            list-style: none;
-        }
+        .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+        .nav-links { display: flex; gap: 28px; list-style: none; }
 
         .nav-links a {
             font-size: 13px;
@@ -87,6 +78,7 @@
         }
 
         .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--accent); }
 
         .nav-back {
             background: transparent;
@@ -100,25 +92,18 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             text-decoration: none;
-            transition: color .15s, border-color .15s;
+            transition: color .15s;
         }
 
-        .nav-back:hover { color: var(--text); border-color: var(--border2); }
+        .nav-back:hover { color: var(--text); }
 
-        /* PAGE LAYOUT */
         .page-layout {
             display: grid;
             grid-template-columns: 1fr 300px;
             min-height: calc(100vh - 53px);
         }
 
-        /* FORM AREA */
-        .form-area {
-            padding: 32px 36px;
-            border-right: 1px solid var(--border);
-        }
-
-        .page-header { margin-bottom: 32px; }
+        .form-area { padding: 32px 36px; border-right: 1px solid var(--border); }
 
         .page-eyebrow {
             font-size: 11px;
@@ -135,9 +120,9 @@
             font-size: 42px;
             text-transform: uppercase;
             letter-spacing: -0.5px;
+            margin-bottom: 32px;
         }
 
-        /* FORM ELEMENTS */
         .section-label {
             font-family: 'Barlow Condensed', sans-serif;
             font-weight: 700;
@@ -151,27 +136,12 @@
             gap: 12px;
         }
 
-        .section-label::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 28px;
-        }
+        .divider { border: none; border-top: 1px solid var(--border); margin: 0 0 28px; }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-        }
-
-        .form-group.full { grid-column: 1 / -1; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+        .form-group { display: flex; flex-direction: column; gap: 7px; }
 
         label {
             font-size: 11px;
@@ -196,30 +166,129 @@
         }
 
         input[type="text"]:focus,
-        input[type="number"]:focus {
-            border-color: var(--accent);
-        }
-
+        input[type="number"]:focus { border-color: var(--accent); }
         input::placeholder { color: var(--muted); opacity: 1; }
+        input.input-error { border-color: var(--error-border) !important; background: var(--error-bg) !important; }
 
-        .input-error {
-            border-color: var(--error-border) !important;
-            background: var(--error-bg) !important;
+        .field-validation-error { font-size: 12px; color: var(--red); margin-top: 4px; display: block; }
+
+        /* PLAYER SEARCH */
+        .player-search-wrap { position: relative; margin-bottom: 28px; }
+
+        .player-search-input {
+            width: 100%;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            font-size: 15px;
+            padding: 11px 40px 11px 14px;
+            outline: none;
+            transition: border-color .15s;
         }
 
-        .field-validation-error {
-            font-size: 12px;
-            color: var(--red);
-            margin-top: 4px;
+        .player-search-input:focus { border-color: var(--accent); }
+        .player-search-input::placeholder { color: var(--muted); }
+
+        .search-spinner {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+            display: none;
         }
 
-        .divider {
+
+        .player-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 50;
+            display: none;
+        }
+
+        .player-option {
+            padding: 12px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: background .1s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .player-option:last-child { border-bottom: none; }
+        .player-option:hover { background: var(--bg3); }
+
+        .player-option-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .player-option-team {
+            font-size: 11px;
+            color: var(--muted);
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .player-selected-badge {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,229,160,0.08);
+            border: 1px solid rgba(0,229,160,0.2);
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-top: 8px;
+        }
+
+        .player-selected-badge.visible { display: flex; }
+
+        .player-selected-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .player-clear {
+            margin-left: auto;
+            background: none;
             border: none;
-            border-top: 1px solid var(--border);
-            margin: 0 0 28px;
+            color: var(--muted);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: color .1s;
         }
 
-        /* BET TYPE SELECTOR */
+        .player-clear:hover { color: var(--red); }
+
+        .player-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+        /* BET TYPE */
         .bet-type-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -243,7 +312,7 @@
             user-select: none;
         }
 
-        .bet-type-btn:hover { border-color: var(--border2); color: var(--text); }
+        .bet-type-btn:hover { color: var(--text); }
 
         .bet-type-btn.selected {
             background: rgba(0,229,160,0.1);
@@ -262,7 +331,15 @@
             line-height: 1.2;
         }
 
-        /* PROP VALUE */
+        /* PROP VALUE + OVER/UNDER */
+        .value-ou-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 28px;
+        }
+
         .value-wrap { position: relative; }
 
         .value-prefix {
@@ -283,22 +360,47 @@
             color: var(--gold) !important;
         }
 
-        /* PARLAY TOGGLE */
-        .toggle-row {
+        /* OVER/UNDER TOGGLE */
+        .ou-toggle {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            overflow: hidden;
+            height: 46px;
         }
 
-        .toggle {
-            position: relative;
-            width: 42px;
-            height: 24px;
+        .ou-btn {
+            flex: 1;
+            background: var(--bg2);
+            border: none;
+            color: var(--muted);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 0 18px;
             cursor: pointer;
-            flex-shrink: 0;
+            transition: all .15s;
+            user-select: none;
+            white-space: nowrap;
         }
 
+        .ou-btn:first-child { border-right: 1px solid var(--border2); }
+
+        .ou-btn.over.selected {
+            background: rgba(0,229,160,0.12);
+            color: var(--over);
+        }
+
+        .ou-btn.under.selected {
+            background: rgba(255,77,109,0.1);
+            color: var(--under);
+        }
+
+        /* PARLAY TOGGLE */
+        .toggle-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+
+        .toggle { position: relative; width: 42px; height: 24px; cursor: pointer; flex-shrink: 0; }
         .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
 
         .slider {
@@ -313,40 +415,22 @@
         .slider:before {
             content: '';
             position: absolute;
-            width: 18px;
-            height: 18px;
-            left: 2px;
-            top: 2px;
+            width: 18px; height: 18px;
+            left: 2px; top: 2px;
             background: var(--muted);
             border-radius: 50%;
             transition: all .2s;
         }
 
-        .toggle input:checked + .slider {
-            background: rgba(0,229,160,0.15);
-            border-color: var(--accent);
-        }
-
-        .toggle input:checked + .slider:before {
-            transform: translateX(18px);
-            background: var(--accent);
-        }
-
-        .toggle-label {
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--text);
-        }
+        .toggle input:checked + .slider { background: rgba(0,229,160,0.15); border-color: var(--accent); }
+        .toggle input:checked + .slider:before { transform: translateX(18px); background: var(--accent); }
+        .toggle-label { font-size: 15px; font-weight: 500; color: var(--text); }
 
         .parlay-field { display: none; }
         .parlay-field.visible { display: block; }
 
-        /* FORM ACTIONS */
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 8px;
-        }
+        /* SUBMIT */
+        .form-actions { display: flex; gap: 12px; margin-top: 8px; }
 
         .btn-submit {
             background: var(--accent);
@@ -378,18 +462,15 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             text-decoration: none;
-            transition: color .15s;
             display: flex;
             align-items: center;
+            transition: color .15s;
         }
 
         .btn-cancel:hover { color: var(--text); }
 
         /* PREVIEW SIDEBAR */
-        .preview-sidebar {
-            padding: 28px 22px;
-            background: var(--bg2);
-        }
+        .preview-sidebar { padding: 28px 22px; background: var(--bg2); }
 
         .preview-card {
             background: var(--bg3);
@@ -411,11 +492,11 @@
         .preview-player {
             font-family: 'Barlow Condensed', sans-serif;
             font-weight: 900;
-            font-size: 28px;
+            font-size: 26px;
             text-transform: uppercase;
             line-height: 1;
             margin-bottom: 4px;
-            min-height: 32px;
+            min-height: 30px;
             color: var(--text);
         }
 
@@ -425,9 +506,10 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 14px;
-            padding-top: 14px;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 1px solid var(--border);
+            gap: 8px;
         }
 
         .preview-type {
@@ -439,14 +521,26 @@
             padding: 6px 14px;
             border-radius: 5px;
             letter-spacing: 1px;
-            min-width: 56px;
+            min-width: 52px;
             text-align: center;
         }
+
+        .preview-ou {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .preview-ou.over  { background: rgba(0,229,160,0.1); color: var(--over); border: 1px solid rgba(0,229,160,0.25); }
+        .preview-ou.under { background: rgba(255,77,109,0.1); color: var(--under); border: 1px solid rgba(255,77,109,0.3); }
 
         .preview-value {
             font-family: 'Barlow Condensed', sans-serif;
             font-weight: 900;
-            font-size: 32px;
+            font-size: 30px;
             color: var(--gold);
         }
 
@@ -479,14 +573,10 @@
         }
 
         .type-full { color: var(--muted); }
-
-        /* HIDDEN FIELD for PropType value */
-        #PropTypeHidden { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- NAVIGATION -->
     <nav>
         <a class="logo" asp-controller="Home" asp-action="Index">
             <div class="logo-dot"></div>
@@ -500,30 +590,47 @@
         <a class="nav-back" asp-controller="Home" asp-action="Index">← Dashboard</a>
     </nav>
 
-    <!-- PAGE LAYOUT -->
     <div class="page-layout">
-
-        <!-- FORM -->
         <div class="form-area">
-            <div class="page-header">
-                <div class="page-eyebrow">New Entry</div>
-                <h1 class="page-title">Add Prop</h1>
-            </div>
+            <div class="page-eyebrow">New Entry</div>
+            <h1 class="page-title">Add Prop</h1>
 
             <form asp-action="Create" method="post" id="propForm">
                 @Html.AntiForgeryToken()
 
-                <!-- Hidden field for PropType (set by JS button clicks) -->
-                <input type="hidden" asp-for="PropType" id="PropTypeHidden" />
+                <input type="hidden" asp-for="PropType"  id="PropTypeHidden" />
+                <input type="hidden" asp-for="OverUnder" id="OverUnderHidden" value="Over" />
+                <input type="hidden" asp-for="BdlPlayerId" id="BdlPlayerIdHidden" />
 
-                <!-- PLAYER INFO -->
-                <div class="section-label">Player Info</div>
+                <!-- PLAYER SEARCH -->
+                <div class="section-label">Player</div>
 
-                <div class="form-grid">
+                <div class="player-search-wrap">
+                    <input type="text"
+                           class="player-search-input"
+                           id="playerSearchInput"
+                           placeholder="Search by player name (e.g. LeBron James)..."
+                           autocomplete="off"
+                           oninput="onPlayerSearch(this.value)" />
+                    <div class="search-spinner" id="searchSpinner"></div>
+                    <div class="player-dropdown" id="playerDropdown"></div>
+                </div>
+
+                <div class="player-selected-badge" id="selectedBadge">
+                    <span class="player-selected-name" id="selectedName"></span>
+                    <button type="button" class="player-clear" onclick="clearPlayer()" title="Clear">✕</button>
+                </div>
+                <div class="player-hint" id="playerHint">
+                    Search to link this prop to the BallDontLie API for auto stat checking.
+                    Name fields below will be filled automatically.
+                </div>
+
+                <div class="form-grid" style="margin-top:16px;">
                     <div class="form-group">
                         <label asp-for="PlayerFirstName">First Name</label>
                         <input asp-for="PlayerFirstName"
                                type="text"
+                               id="PlayerFirstName"
                                placeholder="e.g. LeBron"
                                oninput="updatePreview()"
                                class="@(ViewData.ModelState["PlayerFirstName"]?.Errors.Count > 0 ? "input-error" : "")" />
@@ -533,6 +640,7 @@
                         <label asp-for="PlayerLastName">Last Name</label>
                         <input asp-for="PlayerLastName"
                                type="text"
+                               id="PlayerLastName"
                                placeholder="e.g. James"
                                oninput="updatePreview()"
                                class="@(ViewData.ModelState["PlayerLastName"]?.Errors.Count > 0 ? "input-error" : "")" />
@@ -555,16 +663,16 @@
                     {
                         var displayLabels = new Dictionary<Prop.BetType, (string Short, string Full)>
                         {
-                            [Prop.BetType.PTS]       = ("PTS",   "Points"),
-                            [Prop.BetType.AST]       = ("AST",   "Assists"),
-                            [Prop.BetType.REB]       = ("REB",   "Rebounds"),
-                            [Prop.BetType.PRA]       = ("PRA",   "Pts+Reb+Ast"),
-                            [Prop.BetType.PA]        = ("PA",    "Pts+Ast"),
-                            [Prop.BetType.PR]        = ("PR",    "Pts+Reb"),
-                            [Prop.BetType.AR]        = ("AR",    "Ast+Reb"),
-                            [Prop.BetType.THREEMADE] = ("3PM",   "Threes Made"),
-                            [Prop.BetType.DD]        = ("DD",    "Double-Double"),
-                            [Prop.BetType.TD]        = ("TD",    "Triple-Double"),
+                            [Prop.BetType.PTS]       = ("PTS",  "Points"),
+                            [Prop.BetType.AST]       = ("AST",  "Assists"),
+                            [Prop.BetType.REB]       = ("REB",  "Rebounds"),
+                            [Prop.BetType.PRA]       = ("PRA",  "Pts+Reb+Ast"),
+                            [Prop.BetType.PA]        = ("PA",   "Pts+Ast"),
+                            [Prop.BetType.PR]        = ("PR",   "Pts+Reb"),
+                            [Prop.BetType.AR]        = ("AR",   "Ast+Reb"),
+                            [Prop.BetType.THREEMADE] = ("3PM",  "Threes Made"),
+                            [Prop.BetType.DD]        = ("DD",   "Double-Double"),
+                            [Prop.BetType.TD]        = ("TD",   "Triple-Double"),
                         };
 
                         var label = displayLabels[betType];
@@ -581,12 +689,17 @@
 
                 <hr class="divider" />
 
-                <!-- PROP VALUE -->
+                <!-- PROP VALUE + OVER/UNDER -->
                 <div class="section-label">Prop Value</div>
 
-                <div class="form-grid">
+                @if (ViewData.ModelState["OverUnder"]?.Errors.Count > 0)
+                {
+                    <div class="field-validation-error" style="margin-bottom:12px;">Please select Over or Under.</div>
+                }
+
+                <div class="value-ou-row">
                     <div class="form-group">
-                        <label asp-for="PropValue">Over/Under Line</label>
+                        <label asp-for="PropValue">Line</label>
                         <div class="value-wrap">
                             <span class="value-prefix">#</span>
                             <input asp-for="PropValue"
@@ -594,10 +707,24 @@
                                    placeholder="0.0"
                                    step="0.5"
                                    min="0"
+                                   id="PropValue"
                                    class="value-input @(ViewData.ModelState["PropValue"]?.Errors.Count > 0 ? "input-error" : "")"
                                    oninput="updatePreview()" />
                         </div>
                         <span asp-validation-for="PropValue" class="field-validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Over / Under</label>
+                        <div class="ou-toggle">
+                            <button type="button"
+                                    class="ou-btn over @(Model?.OverUnder == Prop.OverUnderType.Over ? "selected" : "")"
+                                    id="ouOver"
+                                    onclick="selectOU('Over')">Over</button>
+                            <button type="button"
+                                    class="ou-btn under @(Model?.OverUnder == Prop.OverUnderType.Under ? "selected" : "")"
+                                    id="ouUnder"
+                                    onclick="selectOU('Under')">Under</button>
+                        </div>
                     </div>
                 </div>
 
@@ -626,12 +753,10 @@
                     </div>
                 </div>
 
-                <!-- SUBMIT -->
-                <div class="form-actions" style="margin-top: 28px;">
+                <div class="form-actions" style="margin-top:28px;">
                     <button type="submit" class="btn-submit">Save Prop →</button>
                     <a class="btn-cancel" asp-controller="Home" asp-action="Index">Cancel</a>
                 </div>
-
             </form>
         </div>
 
@@ -644,6 +769,7 @@
                 <div class="preview-player placeholder" id="prevPlayer">Player Name</div>
                 <div class="preview-row">
                     <div class="preview-type" id="prevType">—</div>
+                    <div class="preview-ou over" id="prevOu">Over</div>
                     <div class="preview-value placeholder" id="prevValue">—</div>
                 </div>
             </div>
@@ -662,7 +788,6 @@
                 <div class="type-row"><span class="type-code">TD</span><span class="type-full">Triple-Double</span></div>
             </div>
         </aside>
-
     </div>
 
     @section Scripts {
@@ -671,73 +796,147 @@
 
     <script>
         let selectedTypeDisplay = null;
+        let selectedOU = 'Over';
+        let searchTimeout = null;
 
-        // If model was returned with errors, restore selected type highlight
+        // Restore state on validation failure
         (function () {
             const hidden = document.getElementById('PropTypeHidden');
-            if (hidden && hidden.value) {
+            if (hidden?.value) {
                 const btn = document.querySelector(`.bet-type-btn[data-value="${hidden.value}"]`);
                 if (btn) {
+                    btn.classList.add('selected');
                     selectedTypeDisplay = btn.querySelector('.bet-type-sub')
                         ? btn.childNodes[0].textContent.trim()
                         : btn.textContent.trim();
-                    btn.classList.add('selected');
-                    document.getElementById('prevType').textContent = selectedTypeDisplay;
-                    document.getElementById('prevType').closest('.preview-value')?.classList.remove('placeholder');
                 }
             }
+            const ouHidden = document.getElementById('OverUnderHidden');
+            if (ouHidden?.value) selectOU(ouHidden.value, false);
 
-            // Restore parlay toggle if ParlayId was set
             const parlayId = document.getElementById('ParlayId');
-            if (parlayId && parlayId.value && parseInt(parlayId.value) > 0) {
+            if (parlayId?.value && parseInt(parlayId.value) > 0) {
                 document.getElementById('parlayToggle').checked = true;
                 document.getElementById('parlayField').classList.add('visible');
             }
-
             updatePreview();
         })();
+
+        // ── Player search ────────────────────────────────────────────────
+
+        function onPlayerSearch(val) {
+            clearTimeout(searchTimeout);
+            const dropdown = document.getElementById('playerDropdown');
+
+            if (val.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            document.getElementById('searchSpinner').style.display = 'block';
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/Prop/SearchPlayers?name=${encodeURIComponent(val)}`);
+                    const players = await res.json();
+
+                    document.getElementById('searchSpinner').style.display = 'none';
+
+                    if (!players.length) {
+                        dropdown.innerHTML = '<div class="player-option"><span style="color:var(--muted);font-size:13px;">No players found</span></div>';
+                    } else {
+                        dropdown.innerHTML = players.map(p => `
+                            <div class="player-option" onclick="selectPlayer(${p.id},'${esc(p.firstName)}','${esc(p.lastName)}','${esc(p.team)}')">
+                                <span class="player-option-name">${esc(p.firstName)} ${esc(p.lastName)}</span>
+                                <span class="player-option-team">${esc(p.team)}</span>
+                            </div>
+                        `).join('');
+                    }
+
+                    dropdown.style.display = 'block';
+                } catch {
+                    document.getElementById('searchSpinner').style.display = 'none';
+                }
+            }, 350);
+        }
+
+        function selectPlayer(id, firstName, lastName, team) {
+            document.getElementById('BdlPlayerIdHidden').value = id;
+            document.getElementById('PlayerFirstName').value   = firstName;
+            document.getElementById('PlayerLastName').value    = lastName;
+            document.getElementById('playerSearchInput').value = '';
+            document.getElementById('playerDropdown').style.display = 'none';
+
+            const badge = document.getElementById('selectedBadge');
+            document.getElementById('selectedName').textContent = `${firstName} ${lastName} (${team})`;
+            badge.classList.add('visible');
+            document.getElementById('playerHint').style.display = 'none';
+
+            updatePreview();
+        }
+
+        function clearPlayer() {
+            document.getElementById('BdlPlayerIdHidden').value  = '';
+            document.getElementById('PlayerFirstName').value    = '';
+            document.getElementById('PlayerLastName').value     = '';
+            document.getElementById('playerSearchInput').value  = '';
+            document.getElementById('selectedBadge').classList.remove('visible');
+            document.getElementById('playerHint').style.display = 'block';
+            updatePreview();
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.player-search-wrap'))
+                document.getElementById('playerDropdown').style.display = 'none';
+        });
+
+        // ── Prop type ────────────────────────────────────────────────────
 
         function selectType(enumVal, displayShort) {
             selectedTypeDisplay = displayShort;
             document.getElementById('PropTypeHidden').value = enumVal;
-
             document.querySelectorAll('.bet-type-btn').forEach(b => {
                 b.classList.toggle('selected', b.dataset.value === enumVal);
             });
-
-            const typeEl = document.getElementById('prevType');
-            typeEl.textContent = displayShort;
+            document.getElementById('prevType').textContent = displayShort;
             updatePreview();
         }
+
+        // ── Over / Under ─────────────────────────────────────────────────
+
+        function selectOU(val, updatePrev = true) {
+            selectedOU = val;
+            document.getElementById('OverUnderHidden').value = val;
+            document.getElementById('ouOver').classList.toggle('selected',  val === 'Over');
+            document.getElementById('ouUnder').classList.toggle('selected', val === 'Under');
+            if (updatePrev) updatePreview();
+        }
+
+        // ── Parlay toggle ────────────────────────────────────────────────
 
         function toggleParlay(on) {
-            const field = document.getElementById('parlayField');
-            field.classList.toggle('visible', on);
-            if (!on) {
-                document.getElementById('ParlayId').value = '';
-            }
+            document.getElementById('parlayField').classList.toggle('visible', on);
+            if (!on) document.getElementById('ParlayId').value = '';
             updatePreview();
         }
 
+        // ── Live preview ─────────────────────────────────────────────────
+
         function updatePreview() {
-            const fn = document.getElementById('PlayerFirstName')?.value.trim() || '';
-            const ln = document.getElementById('PlayerLastName')?.value.trim() || '';
-            const val = document.getElementById('PropValue')?.value || '';
+            const fn  = document.getElementById('PlayerFirstName')?.value.trim() || '';
+            const ln  = document.getElementById('PlayerLastName')?.value.trim()  || '';
+            const val = document.getElementById('PropValue')?.value               || '';
             const parlayOn = document.getElementById('parlayToggle')?.checked;
-            const parlayId = document.getElementById('ParlayId')?.value || '';
+            const parlayId = document.getElementById('ParlayId')?.value           || '';
 
             const playerEl = document.getElementById('prevPlayer');
             const full = [fn, ln].filter(Boolean).join(' ').toUpperCase();
-            if (full) {
-                playerEl.textContent = full;
-                playerEl.classList.remove('placeholder');
-            } else {
-                playerEl.textContent = 'Player Name';
-                playerEl.classList.add('placeholder');
-            }
+            if (full) { playerEl.textContent = full; playerEl.classList.remove('placeholder'); }
+            else      { playerEl.textContent = 'Player Name'; playerEl.classList.add('placeholder'); }
 
             const valEl = document.getElementById('prevValue');
-            if (val) {
+            if (val && parseFloat(val) > 0) {
                 valEl.textContent = parseFloat(val).toFixed(1);
                 valEl.classList.remove('placeholder');
             } else {
@@ -745,14 +944,21 @@
                 valEl.classList.add('placeholder');
             }
 
+            const ouEl = document.getElementById('prevOu');
+            ouEl.textContent = selectedOU;
+            ouEl.className   = `preview-ou ${selectedOU.toLowerCase()}`;
+
             const parlayLabel = document.getElementById('prevParlay');
-            if (parlayOn && parlayId) {
-                parlayLabel.textContent = 'Parlay #' + parlayId;
-            } else if (parlayOn) {
-                parlayLabel.textContent = 'Parlay (no ID yet)';
-            } else {
-                parlayLabel.textContent = 'No Parlay';
-            }
+            if (parlayOn && parlayId)  parlayLabel.textContent = 'Parlay #' + parlayId;
+            else if (parlayOn)         parlayLabel.textContent = 'Parlay (no ID)';
+            else                       parlayLabel.textContent = 'No Parlay';
+        }
+
+        function esc(str) {
+            return String(str)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+                .replace(/'/g,'&#39;');
         }
     </script>
 

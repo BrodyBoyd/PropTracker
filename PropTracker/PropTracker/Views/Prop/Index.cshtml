@@ -522,6 +522,16 @@
             }
         </div>
 
+        <form asp-controller="Prop" asp-action="CheckPending" method="post" style="margin-left:auto;">
+            @Html.AntiForgeryToken()
+            <button type="submit" style="background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.25);color:var(--accent);font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:9px 16px;border-radius:6px;cursor:pointer;transition:background .15s;"
+                    onmouseover="this.style.background='rgba(0,229,160,0.18)'"
+                    onmouseout="this.style.background='rgba(0,229,160,0.1)'"
+                    onclick="return confirm('Auto-check all pending props via BallDontLie API?')">
+                ↻ Check Pending
+            </button>
+        </form>
+
         <select class="sort-select" id="sortSelect" onchange="applyFilters()">
             <option value="default">Sort: Default</option>
             <option value="name-asc">Name A–Z</option>
@@ -604,6 +614,12 @@
                                 {
                                     <span class="no-parlay">—</span>
                                 }
+                            </td>
+                            <td>
+                                <span class="result-badge @(prop.OverUnder == Prop.OverUnderType.Over ? "hit" : "miss")"
+                                      style="background:@(prop.OverUnder == Prop.OverUnderType.Over ? "rgba(0,229,160,0.1)" : "rgba(255,77,109,0.1)");">
+                                    @prop.OverUnder.ToString()
+                                </span>
                             </td>
                             <td>
                                 @{

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PropTracker.Models;
 using Microsoft.AspNetCore.Identity;
 using PropTracker.Services;
@@ -43,28 +43,16 @@ using PropTracker.Services;
 
 //app.Run();
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<PropContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<PropContext>();
+
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
+// Your DbContext registration (adjust to match your setup)
+builder.Services.AddDbContext<PropContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<PropContext>();
 
 // BallDontLie NBA stats service
 builder.Services.AddHttpClient<NbaStatsService>();
-builder.Services.AddRazorPages();
-builder.Services.AddDistributedMemoryCache();
-// Configure routing before building the app
-builder.Services.AddRouting(options =>
-{
-    options.LowercaseUrls = true;
-    options.AppendTrailingSlash = true;
-});
 
 var app = builder.Build();
 
@@ -73,10 +61,15 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+builder.Services.AddRouting(options =>
+{
+    options.LowercaseUrls = true;
+    options.AppendTrailingSlash = true;
+});
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 

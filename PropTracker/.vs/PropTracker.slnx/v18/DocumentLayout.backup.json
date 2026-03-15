@@ -3,24 +3,24 @@
   "WorkspaceRootPath": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|b:\\onedrive\\desktop\\proptracker\\proptracker\\proptracker\\migrations\\20260315101450_addresulttracking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|solutionrelative:proptracker\\migrations\\20260315101450_addresulttracking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|b:\\onedrive\\desktop\\proptracker\\proptracker\\proptracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|solutionrelative:proptracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|b:\\onedrive\\desktop\\proptracker\\proptracker\\proptracker\\views\\parlay\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|solutionrelative:proptracker\\views\\parlay\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315104439_AddOverUnderandBdlPlayerId2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PropTracker\\Migrations\\20260315104439_AddOverUnderandBdlPlayerId2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|b:\\onedrive\\desktop\\proptracker\\proptracker\\proptracker\\views\\prop\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|solutionrelative:proptracker\\views\\prop\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315104225_AddOverUnderandBdlPlayerId.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PropTracker\\Migrations\\20260315104225_AddOverUnderandBdlPlayerId.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|b:\\onedrive\\desktop\\proptracker\\proptracker\\proptracker\\views\\parlay\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|solutionrelative:proptracker\\views\\parlay\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|b:\\onedrive\\desktop\\proptracker\\proptracker\\proptracker\\views\\prop\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|solutionrelative:proptracker\\views\\prop\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|b:\\onedrive\\desktop\\proptracker\\proptracker\\proptracker\\views\\parlay\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|solutionrelative:proptracker\\views\\parlay\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|b:\\onedrive\\desktop\\proptracker\\proptracker\\proptracker\\migrations\\20260315104813_addoverunderandbdlplayerid.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{499757A8-1036-FAB2-01B5-0E9145DC0FE7}|PropTracker\\PropTracker.csproj|solutionrelative:proptracker\\migrations\\20260315104813_addoverunderandbdlplayerid.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,68 +30,68 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "20260315101450_Addresulttracking.cs",
-              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315101450_Addresulttracking.cs",
-              "RelativeDocumentMoniker": "PropTracker\\Migrations\\20260315101450_Addresulttracking.cs",
-              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315101450_Addresulttracking.cs",
-              "RelativeToolTip": "PropTracker\\Migrations\\20260315101450_Addresulttracking.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAsAAABFAAAAAAAAAA==",
+              "DocumentIndex": 4,
+              "Title": "20260315104813_AddOverUnderandBdlPlayerId.cs",
+              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315104813_AddOverUnderandBdlPlayerId.cs",
+              "RelativeDocumentMoniker": "PropTracker\\Migrations\\20260315104813_AddOverUnderandBdlPlayerId.cs",
+              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315104813_AddOverUnderandBdlPlayerId.cs",
+              "RelativeToolTip": "PropTracker\\Migrations\\20260315104813_AddOverUnderandBdlPlayerId.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-15T10:14:50.21Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-15T10:48:13.627Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Parlay\\Index.cshtml",
-              "RelativeDocumentMoniker": "PropTracker\\Views\\Parlay\\Index.cshtml",
-              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Parlay\\Index.cshtml",
-              "RelativeToolTip": "PropTracker\\Views\\Parlay\\Index.cshtml",
-              "ViewState": "AgIAADQCAAAAAAAAAADwv3UCAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-15T10:13:52.888Z"
+              "Title": "20260315104439_AddOverUnderandBdlPlayerId2.cs",
+              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315104439_AddOverUnderandBdlPlayerId2.cs",
+              "RelativeDocumentMoniker": "PropTracker\\Migrations\\20260315104439_AddOverUnderandBdlPlayerId2.cs",
+              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315104439_AddOverUnderandBdlPlayerId2.cs",
+              "RelativeToolTip": "PropTracker\\Migrations\\20260315104439_AddOverUnderandBdlPlayerId2.cs",
+              "ViewState": "AgIAAEICAAAAAAAAAADgvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-15T10:44:39.371Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Program.cs",
+              "RelativeDocumentMoniker": "PropTracker\\Program.cs",
+              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Program.cs",
+              "RelativeToolTip": "PropTracker\\Program.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAiwFEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-15T10:43:42.391Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Prop\\Index.cshtml",
-              "RelativeDocumentMoniker": "PropTracker\\Views\\Prop\\Index.cshtml",
-              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Prop\\Index.cshtml",
-              "RelativeToolTip": "PropTracker\\Views\\Prop\\Index.cshtml",
-              "ViewState": "AgIAAIgCAAAAAAAAAADwv8YCAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-15T10:13:32.983Z"
+              "Title": "20260315104225_AddOverUnderandBdlPlayerId.cs",
+              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315104225_AddOverUnderandBdlPlayerId.cs",
+              "RelativeDocumentMoniker": "PropTracker\\Migrations\\20260315104225_AddOverUnderandBdlPlayerId.cs",
+              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Migrations\\20260315104225_AddOverUnderandBdlPlayerId.cs",
+              "RelativeToolTip": "PropTracker\\Migrations\\20260315104225_AddOverUnderandBdlPlayerId.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-15T10:42:25.322Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "Details.cshtml",
-              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Parlay\\Details.cshtml",
-              "RelativeDocumentMoniker": "PropTracker\\Views\\Parlay\\Details.cshtml",
-              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Parlay\\Details.cshtml",
-              "RelativeToolTip": "PropTracker\\Views\\Parlay\\Details.cshtml",
-              "ViewState": "AgIAAJcCAAAAAAAAAADwv9UCAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-15T10:13:18.158Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
               "Title": "Create.cshtml",
-              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Parlay\\Create.cshtml",
-              "RelativeDocumentMoniker": "PropTracker\\Views\\Parlay\\Create.cshtml",
-              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Parlay\\Create.cshtml",
-              "RelativeToolTip": "PropTracker\\Views\\Parlay\\Create.cshtml",
-              "ViewState": "AgIAAKUDAAAAAAAAAADwv+MDAAAAAAAAAAAAAA==",
+              "DocumentMoniker": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Prop\\Create.cshtml",
+              "RelativeDocumentMoniker": "PropTracker\\Views\\Prop\\Create.cshtml",
+              "ToolTip": "B:\\OneDrive\\Desktop\\PropTracker\\PropTracker\\PropTracker\\Views\\Prop\\Create.cshtml",
+              "RelativeToolTip": "PropTracker\\Views\\Prop\\Create.cshtml",
+              "ViewState": "AgIAALAAAAAAAAAAAADgv9UAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-15T10:13:03.64Z"
+              "WhenOpened": "2026-03-15T10:42:10.356Z"
             }
           ]
         }

@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PropTracker.Models;
+using PropTracker.Services;
 
 namespace PropTracker.Controllers
 {
-    public class PropController(PropContext context) : Controller
+    public class PropController(PropContext context, NbaStatsService nbaStats) : Controller
     {
         private readonly PropContext _context = context;
+        private readonly NbaStatsService _nbaStats = nbaStats;
 
         // GET: Prop/Index
         [HttpGet]
@@ -29,8 +31,10 @@ namespace PropTracker.Controllers
         public IActionResult Create(Prop prop)
         {
             ModelState.Remove("PropType");
+            ModelState.Remove("OverUnder");
 
             var propTypeRaw = Request.Form["PropType"].ToString();
+            var overUnderRaw = Request.Form["OverUnder"].ToString();
 
             if (string.IsNullOrWhiteSpace(propTypeRaw))
                 ModelState.AddModelError("PropType", "Please select a prop type.");
@@ -38,6 +42,13 @@ namespace PropTracker.Controllers
                 ModelState.AddModelError("PropType", "Invalid prop type selected.");
             else
                 prop.PropType = parsedType;
+
+            if (string.IsNullOrWhiteSpace(overUnderRaw))
+                ModelState.AddModelError("OverUnder", "Please select Over or Under.");
+            else if (!Enum.TryParse<Prop.OverUnderType>(overUnderRaw, out var parsedOu))
+                ModelState.AddModelError("OverUnder", "Invalid Over/Under value.");
+            else
+                prop.OverUnder = parsedOu;
 
             if (prop.ParlayId < 0)
                 ModelState.AddModelError("ParlayId", "Parlay ID must be a positive number.");
@@ -59,10 +70,17 @@ namespace PropTracker.Controllers
 
         // GET: Prop/Details/{id}
         [HttpGet]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var prop = _context.Props.FirstOrDefault(p => p.PropId == id);
             if (prop == null) return NotFound();
+
+            if (prop.BdlPlayerId > 0)
+            {
+                try { ViewBag.LastFiveGames = await _nbaStats.GetLastFiveGamesAsync(prop.BdlPlayerId); }
+                catch { ViewBag.LastFiveGames = null; }
+            }
+
             return View(prop);
         }
 
@@ -83,8 +101,10 @@ namespace PropTracker.Controllers
             if (id != prop.PropId) return BadRequest();
 
             ModelState.Remove("PropType");
+            ModelState.Remove("OverUnder");
 
             var propTypeRaw = Request.Form["PropType"].ToString();
+            var overUnderRaw = Request.Form["OverUnder"].ToString();
 
             if (string.IsNullOrWhiteSpace(propTypeRaw))
                 ModelState.AddModelError("PropType", "Please select a prop type.");
@@ -92,6 +112,13 @@ namespace PropTracker.Controllers
                 ModelState.AddModelError("PropType", "Invalid prop type selected.");
             else
                 prop.PropType = parsedType;
+
+            if (string.IsNullOrWhiteSpace(overUnderRaw))
+                ModelState.AddModelError("OverUnder", "Please select Over or Under.");
+            else if (!Enum.TryParse<Prop.OverUnderType>(overUnderRaw, out var parsedOu))
+                ModelState.AddModelError("OverUnder", "Invalid Over/Under value.");
+            else
+                prop.OverUnder = parsedOu;
 
             if (prop.ParlayId < 0)
                 ModelState.AddModelError("ParlayId", "Parlay ID must be a positive number.");
@@ -109,8 +136,7 @@ namespace PropTracker.Controllers
             return RedirectToAction(nameof(Details), new { id = prop.PropId });
         }
 
-        // POST: Prop/SetResult/{id}?result=Hit&returnUrl=/Parlay/Details/3
-        // Sets the result on a single prop leg and auto-recalculates the parent parlay
+        // POST: Prop/SetResult/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult SetResult(int id, string result, string returnUrl)
@@ -124,18 +150,80 @@ namespace PropTracker.Controllers
             prop.Result = parsedResult;
             _context.SaveChanges();
 
-            // Auto-recalculate the parent parlay result whenever a leg changes
             if (prop.ParlayId > 0)
             {
                 var parlay = _context.Parlays.FirstOrDefault(p => p.ParlayId == prop.ParlayId);
-                if (parlay != null)
-                    RecalculateParlayResult(parlay);
+                if (parlay != null) RecalculateParlayResult(parlay);
             }
 
             if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
 
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // POST: Prop/CheckPending
+        // Auto-resolves all pending props that have a BdlPlayerId via the BallDontLie API
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckPending()
+        {
+            var pendingProps = _context.Props
+                .Where(p => p.Result == Prop.PropResult.Pending && p.BdlPlayerId > 0)
+                .ToList();
+
+            int updated = 0;
+
+            foreach (var prop in pendingProps)
+            {
+                try
+                {
+                    var result = await _nbaStats.CheckPropResultAsync(prop);
+                    if (result != Prop.PropResult.Pending)
+                    {
+                        prop.Result = result;
+                        updated++;
+
+                        if (prop.ParlayId > 0)
+                        {
+                            var parlay = _context.Parlays.FirstOrDefault(p => p.ParlayId == prop.ParlayId);
+                            if (parlay != null) RecalculateParlayResult(parlay);
+                        }
+                    }
+                }
+                catch { /* skip individual failures */ }
+            }
+
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = updated > 0
+                ? $"Checked {pendingProps.Count} pending props — {updated} resolved."
+                : "No pending props could be resolved yet.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Prop/SearchPlayers?name=lebron
+        // JSON endpoint for the live player search field on Create/Edit
+        [HttpGet]
+        public async Task<IActionResult> SearchPlayers(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name) || name.Length < 2)
+                return Json(new List<object>());
+
+            try
+            {
+                var players = await _nbaStats.SearchPlayersAsync(name);
+                return Json(players.Select(p => new
+                {
+                    id = p.Id,
+                    firstName = p.FirstName,
+                    lastName = p.LastName,
+                    team = p.Team,
+                    display = $"{p.FirstName} {p.LastName} ({p.Team})"
+                }));
+            }
+            catch { return Json(new List<object>()); }
         }
 
         // POST: Prop/Delete/{id}
@@ -153,12 +241,8 @@ namespace PropTracker.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
+        // ── Helpers ───────────────────────────────────────────────────────
 
-        // Auto-calculates parlay result from leg results:
-        //   All Hit  → Hit  (stamps HitAt once)
-        //   Any Miss → Miss (clears HitAt)
-        //   Otherwise → Pending
         private void RecalculateParlayResult(Parlay parlay)
         {
             var legProps = _context.Props
