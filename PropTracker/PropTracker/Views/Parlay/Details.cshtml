@@ -1,0 +1,725 @@
+﻿@model PropTracker.Models.Parlay
+@using PropTracker.Models
+
+@{
+    ViewData["Title"] = "Parlay Details";
+    var legProps = ViewBag.LegProps as IEnumerable<Prop> ?? Enumerable.Empty<Prop>();
+
+    var displayMap = new Dictionary<Prop.BetType, string>
+    {
+        [Prop.BetType.PTS]       = "PTS",
+        [Prop.BetType.PA]        = "PA",
+        [Prop.BetType.PR]        = "PR",
+        [Prop.BetType.AR]        = "AR",
+        [Prop.BetType.AST]       = "AST",
+        [Prop.BetType.REB]       = "REB",
+        [Prop.BetType.PRA]       = "PRA",
+        [Prop.BetType.THREEMADE] = "3PM",
+        [Prop.BetType.DD]        = "DD",
+        [Prop.BetType.TD]        = "TD",
+    };
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PropTracker — Parlay #@Model.ParlayId</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --bg2: #12151c;
+            --bg3: #1a1e29;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.14);
+            --accent: #00e5a0;
+            --gold: #f5c842;
+            --text: #e8eaf2;
+            --muted: #7a7f94;
+            --red: #ff4d6d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 1px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+
+        .nav-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--accent); }
+
+        .nav-back {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border2);
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: color .15s;
+        }
+
+        .nav-back:hover { color: var(--text); }
+
+        /* HERO */
+        .detail-hero {
+            padding: 40px 32px 0;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(245,200,66,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(245,200,66,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .hero-content { position: relative; z-index: 1; }
+
+        .parlay-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .hero-multi-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .hero-multi {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 80px;
+            color: var(--gold);
+            line-height: 0.9;
+        }
+
+        .hero-multi-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 28px;
+        }
+
+        .leg-count-badge {
+            background: rgba(0,229,160,0.1);
+            border: 1px solid rgba(0,229,160,0.25);
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .id-badge {
+            font-size: 12px;
+            color: var(--muted);
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        /* STATS STRIP */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-cell { background: var(--bg2); padding: 22px 28px; }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 36px;
+            color: var(--text);
+        }
+
+        .stat-value.gold { color: var(--gold); }
+        .stat-value.accent { color: var(--accent); }
+        .stat-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+        /* BODY */
+        .detail-body {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            min-height: calc(100vh - 340px);
+        }
+
+        .detail-main { padding: 32px; border-right: 1px solid var(--border); }
+
+        .section-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        /* LEG TABLE */
+        table { width: 100%; border-collapse: collapse; }
+
+        thead tr { border-bottom: 1px solid var(--border2); }
+
+        th {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 0 16px 12px;
+            text-align: left;
+        }
+
+        th:first-child { padding-left: 0; }
+        th:last-child { padding-right: 0; text-align: right; }
+        th.right { text-align: right; }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+            cursor: pointer;
+        }
+
+        tbody tr:hover { background: var(--bg2); }
+        tbody tr:last-child { border-bottom: none; }
+
+        td { padding: 14px 16px; font-size: 14px; vertical-align: middle; }
+        td:first-child { padding-left: 0; }
+        td:last-child { padding-right: 0; text-align: right; }
+        td.right { text-align: right; }
+
+        .leg-num {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--muted);
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 17px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--text);
+        }
+
+        .prop-id-note { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        .type-badge {
+            display: inline-block;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .prop-val {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--gold);
+        }
+
+        .unknown-prop { font-size: 13px; color: var(--muted); font-style: italic; }
+
+        /* ACTIONS */
+        .action-panel { padding: 24px; background: var(--bg2); }
+
+        .action-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        .btn-edit {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border2);
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: background .15s;
+            margin-bottom: 8px;
+        }
+
+        .btn-edit:hover { background: var(--bg3); }
+
+        .btn-delete {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid transparent;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: color .15s, border-color .15s, background .15s;
+        }
+
+        .btn-delete:hover {
+            color: var(--red);
+            border-color: rgba(255,77,109,0.3);
+            background: rgba(255,77,109,0.06);
+        }
+
+        .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+        .leg-ids-card {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .leg-ids-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .leg-ids {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .leg-id-pill {
+            background: rgba(0,229,160,0.07);
+            border: 1px solid rgba(0,229,160,0.15);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background .15s;
+        }
+
+        .leg-id-pill:hover { background: rgba(0,229,160,0.14); }
+
+        /* RESULT */
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        .result-badge.pending {
+            background: rgba(122,127,148,0.12);
+            border: 1px solid rgba(122,127,148,0.25);
+            color: var(--muted);
+        }
+
+        .result-badge.hit {
+            background: rgba(0,229,160,0.1);
+            border: 1px solid rgba(0,229,160,0.3);
+            color: var(--accent);
+        }
+
+        .result-badge.miss {
+            background: rgba(255,77,109,0.1);
+            border: 1px solid rgba(255,77,109,0.3);
+            color: var(--red);
+        }
+
+        .result-btn-group {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .btn-result {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--muted);
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 9px 8px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .btn-result:hover { color: var(--text); border-color: var(--border2); }
+
+        .btn-result.hit:hover, .btn-result.hit.active {
+            background: rgba(0,229,160,0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-result.miss:hover, .btn-result.miss.active {
+            background: rgba(255,77,109,0.1);
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .btn-result.pending:hover, .btn-result.pending.active {
+            background: rgba(122,127,148,0.1);
+            border-color: var(--muted);
+            color: var(--muted);
+        }
+
+        .leg-result-cell { text-align: right; }
+
+        .auto-calc-note {
+            font-size: 11px;
+            color: var(--muted);
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a class="logo" asp-controller="Home" asp-action="Index">
+            <div class="logo-dot"></div>
+            PropTracker
+        </a>
+        <ul class="nav-links">
+            <li><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+            <li><a asp-controller="Prop" asp-action="Index">Props</a></li>
+            <li><a asp-controller="Parlay" asp-action="Index" class="active">Parlays</a></li>
+        </ul>
+        <a class="nav-back" asp-controller="Parlay" asp-action="Index">← Parlays</a>
+    </nav>
+
+    <!-- HERO -->
+    <div class="detail-hero">
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <div class="parlay-eyebrow">Parlay #@Model.ParlayId</div>
+            <div class="hero-multi-row">
+                <div class="hero-multi">@Model.Multi.ToString("F2")</div>
+                <div class="hero-multi-label">× multiplier</div>
+            </div>
+            <div class="hero-meta">
+                <span class="leg-count-badge">@Model.PropId.Count leg@(Model.PropId.Count != 1 ? "s" : "")</span>
+                <span class="id-badge">#@Model.ParlayId</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATS STRIP -->
+    <div class="stats-strip">
+        <div class="stat-cell">
+            <div class="stat-label">Multiplier</div>
+            <div class="stat-value gold">@Model.Multi.ToString("F2")×</div>
+            <div class="stat-sub">Payout factor</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-label">Legs</div>
+            <div class="stat-value accent">@Model.PropId.Count</div>
+            <div class="stat-sub">Props in this parlay</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-label">Parlay ID</div>
+            <div class="stat-value">#@Model.ParlayId</div>
+            <div class="stat-sub">Unique identifier</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-label">Result</div>
+            <div class="stat-value" style="font-size:22px; padding-top:6px;">
+                @{
+                    var parlayResultClass = Model.Result switch
+                    {
+                        Parlay.ParlayResult.Hit  => "hit",
+                        Parlay.ParlayResult.Miss => "miss",
+                        _                        => "pending"
+                    };
+                }
+                <span class="result-badge @parlayResultClass">@Model.Result.ToString()</span>
+            </div>
+            <div class="stat-sub">
+                @if (Model.HitAt.HasValue)
+                {
+                    <span>Hit @Model.HitAt.Value.ToLocalTime().ToString("MMM d, yyyy")</span>
+                }
+                else
+                {
+                    <span>Parlay outcome</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="detail-body">
+        <div class="detail-main">
+            <div class="section-title">Legs</div>
+
+            @if (!Model.PropId.Any())
+            {
+                <p style="color:var(--muted); font-size:14px;">No legs on this parlay.</p>
+            }
+            else
+            {
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>Player</th>
+                            <th>Type</th>
+                            <th class="right">Line</th>
+                            <th class="right">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.PropId.Count; i++)
+                        {
+                            var propId = Model.PropId[i];
+                            var prop   = legProps.FirstOrDefault(p => p.PropId == propId);
+
+                            if (prop != null)
+                            {
+                                <tr onclick="window.location='@Url.Action("Details", "Prop", new { id = prop.PropId })'">
+                                    <td><span class="leg-num">@(i + 1)</span></td>
+                                    <td>
+                                        <div class="player-name">@prop.PlayerFirstName @prop.PlayerLastName</div>
+                                        <div class="prop-id-note">#@prop.PropId</div>
+                                    </td>
+                                    <td><span class="type-badge">@displayMap[prop.PropType]</span></td>
+                                    <td class="right"><span class="prop-val">@prop.PropValue.ToString("F1")</span></td>
+                                    <td class="leg-result-cell" onclick="event.stopPropagation()">
+                                        @{
+                                            var legClass = prop.Result switch
+                                            {
+                                                Prop.PropResult.Hit  => "hit",
+                                                Prop.PropResult.Miss => "miss",
+                                                _                    => "pending"
+                                            };
+                                        }
+                                        <div class="result-btn-group" style="justify-content:flex-end;">
+                                            <form asp-controller="Prop" asp-action="SetResult" asp-route-id="@prop.PropId" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="result" value="Hit" />
+                                                <input type="hidden" name="returnUrl" value="/Parlay/Details/@Model.ParlayId" />
+                                                <button type="submit" class="btn-result hit @(prop.Result == Prop.PropResult.Hit ? "active" : "")">Hit</button>
+                                            </form>
+                                            <form asp-controller="Prop" asp-action="SetResult" asp-route-id="@prop.PropId" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="result" value="Miss" />
+                                                <input type="hidden" name="returnUrl" value="/Parlay/Details/@Model.ParlayId" />
+                                                <button type="submit" class="btn-result miss @(prop.Result == Prop.PropResult.Miss ? "active" : "")">Miss</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td><span class="leg-num">@(i + 1)</span></td>
+                                    <td colspan="3"><span class="unknown-prop">Prop #@propId (not found)</span></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <!-- ACTION PANEL -->
+        <aside class="action-panel">
+            <div class="action-title">Actions</div>
+
+            <div class="auto-calc-note">
+                The parlay result is calculated automatically from leg results. Use the override below to manually correct it.
+            </div>
+
+            <div class="action-title">Override Result</div>
+            <div class="result-btn-group" style="margin-bottom:16px;">
+                <form asp-controller="Parlay" asp-action="SetResult" asp-route-id="@Model.ParlayId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="result" value="Hit" />
+                    <button type="submit" class="btn-result hit @(Model.Result == Parlay.ParlayResult.Hit ? "active" : "")">Hit</button>
+                </form>
+                <form asp-controller="Parlay" asp-action="SetResult" asp-route-id="@Model.ParlayId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="result" value="Miss" />
+                    <button type="submit" class="btn-result miss @(Model.Result == Parlay.ParlayResult.Miss ? "active" : "")">Miss</button>
+                </form>
+                <form asp-controller="Parlay" asp-action="SetResult" asp-route-id="@Model.ParlayId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="result" value="Pending" />
+                    <button type="submit" class="btn-result pending @(Model.Result == Parlay.ParlayResult.Pending ? "active" : "")">Pending</button>
+                </form>
+            </div>
+
+            <div class="divider" style="margin-top:0;"></div>
+
+            <div class="action-title">Actions</div>
+            <a class="btn-edit"
+               asp-controller="Parlay"
+               asp-action="Edit"
+               asp-route-id="@Model.ParlayId">
+                Edit Parlay
+            </a>
+
+            <form asp-controller="Parlay"
+                  asp-action="Delete"
+                  asp-route-id="@Model.ParlayId"
+                  method="post"
+                  onsubmit="return confirm('Delete Parlay #@Model.ParlayId?')">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-delete">Delete Parlay</button>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="action-title">Prop IDs</div>
+            <div class="leg-ids-card">
+                <div class="leg-ids-label">Linked props</div>
+                <div class="leg-ids">
+                    @foreach (var id in Model.PropId)
+                    {
+                        <a class="leg-id-pill"
+                           asp-controller="Prop"
+                           asp-action="Details"
+                           asp-route-id="@id">
+                            #@id
+                        </a>
+                    }
+                </div>
+            </div>
+        </aside>
+    </div>
+
+</body>
+</html>

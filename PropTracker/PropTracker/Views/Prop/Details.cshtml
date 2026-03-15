@@ -1,0 +1,657 @@
+﻿@model PropTracker.Models.Prop
+@using PropTracker.Models
+
+@{
+    ViewData["Title"] = "Prop Details";
+
+    var displayMap = new Dictionary<Prop.BetType, (string Short, string Full)>
+    {
+        [Prop.BetType.PTS]       = ("PTS",  "Points"),
+        [Prop.BetType.PA]        = ("PA",   "Points + Assists"),
+        [Prop.BetType.PR]        = ("PR",   "Points + Rebounds"),
+        [Prop.BetType.AR]        = ("AR",   "Assists + Rebounds"),
+        [Prop.BetType.AST]       = ("AST",  "Assists"),
+        [Prop.BetType.REB]       = ("REB",  "Rebounds"),
+        [Prop.BetType.PRA]       = ("PRA",  "Points + Rebounds + Assists"),
+        [Prop.BetType.THREEMADE] = ("3PM",  "Threes Made"),
+        [Prop.BetType.DD]        = ("DD",   "Double-Double"),
+        [Prop.BetType.TD]        = ("TD",   "Triple-Double"),
+    };
+
+    var typeInfo = displayMap[Model.PropType];
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PropTracker — @Model.PlayerFirstName @Model.PlayerLastName</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --bg2: #12151c;
+            --bg3: #1a1e29;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.14);
+            --accent: #00e5a0;
+            --gold: #f5c842;
+            --text: #e8eaf2;
+            --muted: #7a7f94;
+            --red: #ff4d6d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 1px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+
+        .nav-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--accent); }
+
+        .nav-back {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border2);
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: color .15s;
+        }
+
+        .nav-back:hover { color: var(--text); }
+
+        /* HERO CARD */
+        .detail-hero {
+            padding: 40px 32px 0;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .hero-content { position: relative; z-index: 1; }
+
+        .prop-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .prop-hero-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 64px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            line-height: 0.95;
+            margin-bottom: 16px;
+        }
+
+        .prop-hero-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .type-badge {
+            background: rgba(0,229,160,0.1);
+            border: 1px solid rgba(0,229,160,0.25);
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 5px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .type-full {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .id-badge {
+            font-size: 12px;
+            color: var(--muted);
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        /* STATS STRIP */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-cell {
+            background: var(--bg2);
+            padding: 22px 28px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 36px;
+            color: var(--text);
+        }
+
+        .stat-value.gold { color: var(--gold); }
+        .stat-value.accent { color: var(--accent); }
+
+        .stat-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        /* BODY */
+        .detail-body {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            min-height: calc(100vh - 320px);
+        }
+
+        .detail-main { padding: 32px; border-right: 1px solid var(--border); }
+
+        .section-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* FIELD TABLE */
+        .field-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+
+        .field-table tr { border-bottom: 1px solid var(--border); }
+        .field-table tr:last-child { border-bottom: none; }
+
+        .field-table td {
+            padding: 14px 0;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        .field-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            width: 160px;
+        }
+
+        .field-value { color: var(--text); font-weight: 500; }
+
+        .field-value.mono {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .field-value.gold { color: var(--gold); }
+
+        /* ACTIONS */
+        .action-panel {
+            padding: 24px;
+            background: var(--bg2);
+        }
+
+        .action-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        .btn-edit {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border2);
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: background .15s, border-color .15s;
+            margin-bottom: 8px;
+        }
+
+        .btn-edit:hover { background: var(--bg3); border-color: var(--border2); }
+
+        .btn-delete {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid transparent;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: color .15s, border-color .15s, background .15s;
+        }
+
+        .btn-delete:hover {
+            color: var(--red);
+            border-color: rgba(255,77,109,0.3);
+            background: rgba(255,77,109,0.06);
+        }
+
+        .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+        .parlay-link-card {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 14px;
+            text-decoration: none;
+            display: block;
+            transition: border-color .15s;
+        }
+
+        .parlay-link-card:hover { border-color: var(--accent); }
+
+        .plc-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .plc-id {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--accent);
+        }
+
+        .no-parlay-note {
+            font-size: 13px;
+            color: var(--muted);
+            background: var(--bg3);
+            border: 1px dashed var(--border2);
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        /* RESULT BADGE */
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        .result-badge.pending {
+            background: rgba(122,127,148,0.12);
+            border: 1px solid rgba(122,127,148,0.25);
+            color: var(--muted);
+        }
+
+        .result-badge.hit {
+            background: rgba(0,229,160,0.1);
+            border: 1px solid rgba(0,229,160,0.3);
+            color: var(--accent);
+        }
+
+        .result-badge.miss {
+            background: rgba(255,77,109,0.1);
+            border: 1px solid rgba(255,77,109,0.3);
+            color: var(--red);
+        }
+
+        /* RESULT BUTTONS */
+        .result-btn-group {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .btn-result {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--muted);
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 9px 8px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .btn-result:hover { color: var(--text); border-color: var(--border2); }
+
+        .btn-result.hit:hover, .btn-result.hit.active {
+            background: rgba(0,229,160,0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-result.miss:hover, .btn-result.miss.active {
+            background: rgba(255,77,109,0.1);
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .btn-result.pending:hover, .btn-result.pending.active {
+            background: rgba(122,127,148,0.1);
+            border-color: var(--muted);
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a class="logo" asp-controller="Home" asp-action="Index">
+            <div class="logo-dot"></div>
+            PropTracker
+        </a>
+        <ul class="nav-links">
+            <li><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+            <li><a asp-controller="Prop" asp-action="Index" class="active">Props</a></li>
+            <li><a asp-controller="Parlay" asp-action="Index">Parlays</a></li>
+        </ul>
+        <a class="nav-back" asp-controller="Prop" asp-action="Index">← Props</a>
+    </nav>
+
+    <!-- HERO -->
+    <div class="detail-hero">
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <div class="prop-eyebrow">Prop #@Model.PropId</div>
+            <div class="prop-hero-name">@Model.PlayerFirstName<br>@Model.PlayerLastName</div>
+            <div class="prop-hero-meta">
+                <span class="type-badge">@typeInfo.Short</span>
+                <span class="type-full">@typeInfo.Full</span>
+                <span class="id-badge">#@Model.PropId</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATS STRIP -->
+    <div class="stats-strip">
+        <div class="stat-cell">
+            <div class="stat-label">Prop Value</div>
+            <div class="stat-value gold">@Model.PropValue.ToString("F1")</div>
+            <div class="stat-sub">Over/Under line</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-label">Bet Type</div>
+            <div class="stat-value accent">@typeInfo.Short</div>
+            <div class="stat-sub">@typeInfo.Full</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-label">Parlay</div>
+            <div class="stat-value">
+                @if (Model.ParlayId > 0)
+                {
+                    <span>#@Model.ParlayId</span>
+                }
+                else
+                {
+                    <span style="color:var(--muted)">None</span>
+                }
+            </div>
+            <div class="stat-sub">Linked parlay</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-label">Result</div>
+            <div class="stat-value" style="font-size:22px; padding-top:6px;">
+                @{
+                    var resultClass = Model.Result switch
+                    {
+                        Prop.PropResult.Hit  => "hit",
+                        Prop.PropResult.Miss => "miss",
+                        _                    => "pending"
+                    };
+                }
+                <span class="result-badge @resultClass">@Model.Result.ToString()</span>
+            </div>
+            <div class="stat-sub">Leg outcome</div>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="detail-body">
+
+        <div class="detail-main">
+            <div class="section-title">Prop Details</div>
+
+            <table class="field-table">
+                <tr>
+                    <td class="field-label">Prop ID</td>
+                    <td class="field-value">#@Model.PropId</td>
+                </tr>
+                <tr>
+                    <td class="field-label">First Name</td>
+                    <td class="field-value">@Model.PlayerFirstName</td>
+                </tr>
+                <tr>
+                    <td class="field-label">Last Name</td>
+                    <td class="field-value">@Model.PlayerLastName</td>
+                </tr>
+                <tr>
+                    <td class="field-label">Prop Type</td>
+                    <td class="field-value">
+                        @typeInfo.Short
+                        <span style="font-size:12px; color:var(--muted); margin-left:8px;">@typeInfo.Full</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field-label">Prop Value</td>
+                    <td class="field-value mono gold">@Model.PropValue.ToString("F1")</td>
+                </tr>
+                <tr>
+                    <td class="field-label">Parlay ID</td>
+                    <td class="field-value">
+                        @if (Model.ParlayId > 0)
+                        {
+                            <a asp-controller="Parlay" asp-action="Details" asp-route-id="@Model.ParlayId"
+                               style="color:var(--accent); text-decoration:none; font-weight:600;">
+                                Parlay #@Model.ParlayId
+                            </a>
+                        }
+                        else
+                        {
+                            <span style="color:var(--muted)">Not in a parlay</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field-label">Result</td>
+                    <td class="field-value">
+                        <span class="result-badge @(Model.Result == Prop.PropResult.Hit ? "hit" : Model.Result == Prop.PropResult.Miss ? "miss" : "pending")">
+                            @Model.Result.ToString()
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- ACTION PANEL -->
+        <aside class="action-panel">
+            <div class="action-title">Actions</div>
+
+            <a class="btn-edit"
+               asp-controller="Prop"
+               asp-action="Edit"
+               asp-route-id="@Model.PropId">
+                Edit Prop
+            </a>
+
+            <form asp-controller="Prop"
+                  asp-action="Delete"
+                  asp-route-id="@Model.PropId"
+                  method="post"
+                  onsubmit="return confirm('Delete prop for @Model.PlayerFirstName @Model.PlayerLastName?')">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-delete">Delete Prop</button>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="action-title">Set Result</div>
+            <div class="result-btn-group">
+                <form asp-controller="Prop" asp-action="SetResult" asp-route-id="@Model.PropId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="result" value="Hit" />
+                    <input type="hidden" name="returnUrl" value="/Prop/Details/@Model.PropId" />
+                    <button type="submit" class="btn-result hit @(Model.Result == Prop.PropResult.Hit ? "active" : "")">Hit</button>
+                </form>
+                <form asp-controller="Prop" asp-action="SetResult" asp-route-id="@Model.PropId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="result" value="Miss" />
+                    <input type="hidden" name="returnUrl" value="/Prop/Details/@Model.PropId" />
+                    <button type="submit" class="btn-result miss @(Model.Result == Prop.PropResult.Miss ? "active" : "")">Miss</button>
+                </form>
+                <form asp-controller="Prop" asp-action="SetResult" asp-route-id="@Model.PropId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="result" value="Pending" />
+                    <input type="hidden" name="returnUrl" value="/Prop/Details/@Model.PropId" />
+                    <button type="submit" class="btn-result pending @(Model.Result == Prop.PropResult.Pending ? "active" : "")">Pending</button>
+                </form>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="action-title">Parlay</div>
+
+            @if (Model.ParlayId > 0)
+            {
+                <a class="parlay-link-card"
+                   asp-controller="Parlay"
+                   asp-action="Details"
+                   asp-route-id="@Model.ParlayId">
+                    <div class="plc-label">Linked to</div>
+                    <div class="plc-id">Parlay #@Model.ParlayId</div>
+                </a>
+            }
+            else
+            {
+                <div class="no-parlay-note">Not part of a parlay yet.</div>
+            }
+        </aside>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,629 @@
+﻿@model IEnumerable<PropTracker.Models.Parlay>
+@using PropTracker.Models
+
+@{
+    ViewData["Title"] = "Parlays";
+    var allProps = ViewBag.AllProps as IEnumerable<Prop> ?? Enumerable.Empty<Prop>();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PropTracker — Parlays</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --bg2: #12151c;
+            --bg3: #1a1e29;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.14);
+            --accent: #00e5a0;
+            --gold: #f5c842;
+            --text: #e8eaf2;
+            --muted: #7a7f94;
+            --red: #ff4d6d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* NAV */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 1px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+
+        .nav-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--accent); }
+
+        .nav-cta {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: opacity .2s;
+        }
+
+        .nav-cta:hover { opacity: 0.85; }
+
+        /* PAGE HEADER */
+        .page-header {
+            padding: 32px 32px 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .page-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .page-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 42px;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+
+        .parlay-count {
+            font-size: 15px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .parlay-count span { color: var(--text); font-weight: 600; }
+
+        /* TOOLBAR */
+        .toolbar {
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            padding: 9px 12px 9px 34px;
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        .search-input:focus { border-color: var(--accent); }
+        .search-input::placeholder { color: var(--muted); }
+
+        .sort-select {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--muted);
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            padding: 9px 28px 9px 12px;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237a7f94' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        .sort-select:focus { border-color: var(--accent); outline: none; }
+        .sort-select option { background: #1a1e29; color: #e8eaf2; }
+
+        /* PARLAY GRID */
+        .parlay-grid {
+            padding: 28px 32px 48px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            align-content: start;
+        }
+
+        .parlay-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color .2s, transform .15s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .parlay-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-2px);
+        }
+
+        .parlay-card-header {
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .parlay-id-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .parlay-multi-row {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .parlay-multi-val {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            color: var(--gold);
+            line-height: 1;
+        }
+
+        .parlay-multi-label {
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .parlay-leg-count {
+            background: rgba(0,229,160,0.08);
+            border: 1px solid rgba(0,229,160,0.18);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        /* LEGS */
+        .parlay-legs {
+            padding: 14px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .parlay-leg {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .leg-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .leg-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .leg-player {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .leg-type {
+            font-size: 10px;
+            font-weight: 700;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            color: var(--muted);
+            padding: 2px 7px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .leg-value {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+
+        .leg-unknown {
+            font-size: 12px;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* CARD FOOTER */
+        .parlay-card-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-edit {
+            background: transparent;
+            border: 1px solid var(--border2);
+            color: var(--muted);
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: color .15s, border-color .15s;
+        }
+
+        .btn-edit:hover { color: var(--text); border-color: var(--text); }
+
+        .btn-delete {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--muted);
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: color .15s, border-color .15s, background .15s;
+        }
+
+        .btn-delete:hover {
+            color: var(--red);
+            border-color: rgba(255,77,109,0.3);
+            background: rgba(255,77,109,0.06);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 24px;
+            color: var(--muted);
+        }
+
+        .empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.5; }
+
+        .empty-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 22px;
+            text-transform: uppercase;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .empty-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            transition: opacity .2s;
+        }
+
+        .btn-primary:hover { opacity: 0.85; }
+
+
+        .result-badge {
+            display: inline-flex;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 3px 9px;
+            border-radius: 4px;
+        }
+        .result-badge.pending { background: rgba(122,127,148,0.1); border: 1px solid rgba(122,127,148,0.2); color: var(--muted); }
+        .result-badge.hit     { background: rgba(0,229,160,0.1);   border: 1px solid rgba(0,229,160,0.25); color: var(--accent); }
+        .result-badge.miss    { background: rgba(255,77,109,0.1);   border: 1px solid rgba(255,77,109,0.3); color: var(--red); }
+
+        .card-hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a class="logo" asp-controller="Home" asp-action="Index">
+            <div class="logo-dot"></div>
+            PropTracker
+        </a>
+        <ul class="nav-links">
+            <li><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+            <li><a asp-controller="Prop" asp-action="Index">Props</a></li>
+            <li><a asp-controller="Parlay" asp-action="Index" class="active">Parlays</a></li>
+        </ul>
+        <a class="nav-cta" asp-controller="Parlay" asp-action="Create">+ Build Parlay</a>
+    </nav>
+
+    <div class="page-header">
+        <div>
+            <div class="page-eyebrow">All Parlays</div>
+            <h1 class="page-title">Parlays</h1>
+            <div class="parlay-count">
+                <span id="visibleCount">@Model.Count()</span> of @Model.Count() parlays
+            </div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input class="search-input"
+                   type="text"
+                   id="searchInput"
+                   placeholder="Search by parlay ID..."
+                   oninput="applyFilters()" />
+        </div>
+        <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+            <option value="default">Sort: Default</option>
+            <option value="multi-desc">Multiplier High–Low</option>
+            <option value="multi-asc">Multiplier Low–High</option>
+            <option value="legs-desc">Most Legs</option>
+            <option value="legs-asc">Fewest Legs</option>
+        </select>
+    </div>
+
+    <div class="parlay-grid" id="parlayGrid">
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🎯</div>
+                <div class="empty-title">No Parlays Yet</div>
+                <div class="empty-sub">Build your first parlay by stacking props together.</div>
+                <a class="btn-primary" asp-controller="Parlay" asp-action="Create">+ Build First Parlay</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var parlay in Model)
+            {
+                // Look up prop details from ViewBag
+                var legProps = allProps.Where(p => parlay.PropId.Contains(p.PropId)).ToList();
+
+                var displayMap = new Dictionary<Prop.BetType, string>
+                {
+                    [Prop.BetType.PTS]       = "PTS",
+                    [Prop.BetType.PA]        = "PA",
+                    [Prop.BetType.PR]        = "PR",
+                    [Prop.BetType.AR]        = "AR",
+                    [Prop.BetType.AST]       = "AST",
+                    [Prop.BetType.REB]       = "REB",
+                    [Prop.BetType.PRA]       = "PRA",
+                    [Prop.BetType.THREEMADE] = "3PM",
+                    [Prop.BetType.DD]        = "DD",
+                    [Prop.BetType.TD]        = "TD",
+                };
+
+                <div class="parlay-card"
+                     data-id="@parlay.ParlayId"
+                     data-multi="@parlay.Multi"
+                     data-legs="@parlay.PropId.Count">
+
+                    <div class="parlay-card-header">
+                        <div>
+                            <div class="parlay-id-label">Parlay #@parlay.ParlayId</div>
+                            <div class="parlay-multi-row">
+                                <div class="parlay-multi-val">@parlay.Multi.ToString("F2")×</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
+                            <div class="parlay-leg-count">@parlay.PropId.Count leg@(parlay.PropId.Count != 1 ? "s" : "")</div>
+                            @{
+                                var prc = parlay.Result switch
+                                {
+                                    Parlay.ParlayResult.Hit  => "hit",
+                                    Parlay.ParlayResult.Miss => "miss",
+                                    _                        => "pending"
+                                };
+                            }
+                            <span class="result-badge @prc">@parlay.Result.ToString()</span>
+                        </div>
+                    </div>
+
+                    <div class="parlay-legs">
+                        @foreach (var propId in parlay.PropId)
+                        {
+                            var prop = legProps.FirstOrDefault(p => p.PropId == propId);
+                            if (prop != null)
+                            {
+                                <div class="parlay-leg">
+                                    <div class="leg-left">
+                                        <div class="leg-dot"></div>
+                                        <span class="leg-player">@prop.PlayerFirstName @prop.PlayerLastName</span>
+                                        <span class="leg-type">@displayMap[prop.PropType]</span>
+                                    </div>
+                                    <span class="leg-value">@prop.PropValue.ToString("F1")</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="parlay-leg">
+                                    <div class="leg-left">
+                                        <div class="leg-dot"></div>
+                                        <span class="leg-unknown">Prop #@propId</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div class="parlay-card-footer">
+                        <a class="btn-edit"
+                           asp-controller="Parlay"
+                           asp-action="Edit"
+                           asp-route-id="@parlay.ParlayId">Edit</a>
+                        <form asp-controller="Parlay"
+                              asp-action="Delete"
+                              asp-route-id="@parlay.ParlayId"
+                              method="post"
+                              style="display:inline"
+                              onsubmit="return confirm('Delete Parlay #@parlay.ParlayId?')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-delete">Delete</button>
+                        </form>
+                    </div>
+
+                </div>
+            }
+        }
+
+    </div>
+
+    <script>
+        const totalCount = @Model.Count();
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const sort = document.getElementById('sortSelect').value;
+            const cards = Array.from(document.querySelectorAll('.parlay-card'));
+
+            let visible = cards.filter(card => {
+                return !query || card.dataset.id.includes(query);
+            });
+
+            const hidden = cards.filter(c => !visible.includes(c));
+
+            visible.sort((a, b) => {
+                switch (sort) {
+                    case 'multi-desc': return parseFloat(b.dataset.multi) - parseFloat(a.dataset.multi);
+                    case 'multi-asc':  return parseFloat(a.dataset.multi) - parseFloat(b.dataset.multi);
+                    case 'legs-desc':  return parseInt(b.dataset.legs) - parseInt(a.dataset.legs);
+                    case 'legs-asc':   return parseInt(a.dataset.legs) - parseInt(b.dataset.legs);
+                    default: return 0;
+                }
+            });
+
+            hidden.forEach(c => c.classList.add('card-hidden'));
+
+            const grid = document.getElementById('parlayGrid');
+            visible.forEach(c => {
+                c.classList.remove('card-hidden');
+                grid.appendChild(c);
+            });
+
+            document.getElementById('visibleCount').textContent = visible.length;
+        }
+    </script>
+
+</body>
+</html>

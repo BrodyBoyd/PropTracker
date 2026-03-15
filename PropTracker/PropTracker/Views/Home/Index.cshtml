@@ -1,0 +1,593 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PropTracker — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+            :root {
+                --bg: #0a0c10;
+                --bg2: #12151c;
+                --bg3: #1a1e29;
+                --border: rgba(255,255,255,0.07);
+                --border2: rgba(255,255,255,0.12);
+                --accent: #00e5a0;
+                --gold: #f5c842;
+                --text: #e8eaf2;
+                --muted: #7a7f94;
+                --red: #ff4d6d;
+                --green: #00e5a0;
+            }
+
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family: 'Barlow', sans-serif;
+                min-height: 100vh;
+            }
+
+            /* NAV */
+            nav {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 14px 32px;
+                border-bottom: 1px solid var(--border);
+                background: var(--bg);
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .logo {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-weight: 900;
+                font-size: 22px;
+                letter-spacing: 1px;
+                color: var(--text);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+            }
+
+            .logo-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--accent);
+            }
+
+            .nav-links {
+                display: flex;
+                gap: 28px;
+                list-style: none;
+            }
+
+            .nav-links a {
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--muted);
+                text-decoration: none;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                transition: color .2s;
+            }
+
+            .nav-links a:hover { color: var(--text); }
+            .nav-links a.active { color: var(--accent); }
+
+            .nav-cta {
+                background: var(--accent);
+                color: #000;
+                border: none;
+                padding: 8px 18px;
+                border-radius: 6px;
+                font-family: 'Barlow', sans-serif;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                cursor: pointer;
+                text-decoration: none;
+                transition: opacity .2s;
+            }
+
+            .nav-cta:hover { opacity: 0.85; }
+
+            /* HERO */
+            .hero {
+                padding: 56px 32px 44px;
+                position: relative;
+                overflow: hidden;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .hero-grid {
+                position: absolute;
+                inset: 0;
+                background-image:
+                    linear-gradient(rgba(0,229,160,0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,229,160,0.04) 1px, transparent 1px);
+                background-size: 40px 40px;
+                pointer-events: none;
+            }
+
+            .hero-glow {
+                position: absolute;
+                top: -80px;
+                left: 35%;
+                width: 400px;
+                height: 400px;
+                background: radial-gradient(circle, rgba(0,229,160,0.10) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+            .hero-content { position: relative; z-index: 1; }
+
+            .hero-eyebrow {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                color: var(--accent);
+                margin-bottom: 12px;
+            }
+
+            .hero-title {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-weight: 900;
+                font-size: 64px;
+                line-height: 0.95;
+                text-transform: uppercase;
+                letter-spacing: -1px;
+                margin-bottom: 18px;
+            }
+
+            .hero-title span { color: var(--accent); }
+
+            .hero-sub {
+                font-size: 16px;
+                color: var(--muted);
+                max-width: 480px;
+                line-height: 1.6;
+                margin-bottom: 32px;
+            }
+
+            .hero-actions {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .btn-primary {
+                background: var(--accent);
+                color: #000;
+                border: none;
+                padding: 13px 26px;
+                border-radius: 6px;
+                font-family: 'Barlow', sans-serif;
+                font-size: 14px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                transition: opacity .2s, transform .15s;
+            }
+
+            .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+            .btn-secondary {
+                background: transparent;
+                color: var(--text);
+                border: 1px solid var(--border2);
+                padding: 13px 26px;
+                border-radius: 6px;
+                font-family: 'Barlow', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                transition: background .2s;
+            }
+
+            .btn-secondary:hover { background: var(--bg3); }
+
+            /* STATS ROW */
+            .stats-row {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1px;
+                background: var(--border);
+                border-bottom: 1px solid var(--border);
+            }
+
+            .stat-cell {
+                background: var(--bg2);
+                padding: 22px 28px;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .stat-label {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            .stat-value {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-weight: 700;
+                font-size: 32px;
+                color: var(--text);
+            }
+
+            .stat-value.green { color: var(--green); }
+
+            .stat-delta {
+                font-size: 12px;
+                color: var(--muted);
+            }
+
+            .delta-up { color: var(--green); }
+            .delta-down { color: var(--red); }
+
+            /* MAIN LAYOUT */
+            .main-layout {
+                display: grid;
+                grid-template-columns: 1fr 340px;
+                min-height: calc(100vh - 380px);
+            }
+
+            /* PROPS SECTION */
+            .props-section {
+                padding: 28px 32px;
+                border-right: 1px solid var(--border);
+            }
+
+            .section-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 18px;
+            }
+
+            .section-title {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-weight: 700;
+                font-size: 17px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+            .badge {
+                background: rgba(0,229,160,0.12);
+                color: var(--accent);
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 9px;
+                border-radius: 4px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+
+            .prop-list {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .prop-card {
+                background: var(--bg2);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 15px 18px;
+                display: grid;
+                grid-template-columns: 1fr auto auto;
+                align-items: center;
+                gap: 18px;
+                text-decoration: none;
+                transition: border-color .2s, background .2s;
+            }
+
+            .prop-card:hover {
+                border-color: var(--border2);
+                background: var(--bg3);
+            }
+
+            .prop-player {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-weight: 700;
+                font-size: 17px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--text);
+            }
+
+            .prop-meta {
+                font-size: 12px;
+                color: var(--muted);
+                margin-top: 3px;
+            }
+
+            .prop-type {
+                background: var(--bg3);
+                border: 1px solid var(--border2);
+                color: var(--text);
+                font-size: 12px;
+                font-weight: 700;
+                padding: 5px 12px;
+                border-radius: 4px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+            .prop-value-wrap { text-align: right; }
+
+            .prop-value {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-weight: 700;
+                font-size: 24px;
+                color: var(--gold);
+            }
+
+            .prop-value-label {
+                font-size: 10px;
+                color: var(--muted);
+                letter-spacing: 0.5px;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 48px 24px;
+                color: var(--muted);
+                font-size: 14px;
+                border: 1px dashed var(--border2);
+                border-radius: 8px;
+            }
+
+            .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
+
+            /* PARLAY SIDEBAR */
+            .parlay-sidebar {
+                padding: 28px 22px;
+                background: var(--bg2);
+            }
+
+            .parlay-card {
+                background: var(--bg3);
+                border: 1px solid var(--border2);
+                border-radius: 10px;
+                padding: 18px;
+                margin-bottom: 12px;
+                text-decoration: none;
+                display: block;
+                transition: border-color .2s;
+            }
+
+            .parlay-card:hover { border-color: var(--accent); }
+
+            .parlay-id-label {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--muted);
+                margin-bottom: 8px;
+            }
+
+            .parlay-multi {
+                display: flex;
+                align-items: baseline;
+                gap: 5px;
+                margin-bottom: 12px;
+            }
+
+            .parlay-multi-val {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-weight: 900;
+                font-size: 36px;
+                color: var(--gold);
+            }
+
+            .parlay-multi-label {
+                font-size: 12px;
+                color: var(--muted);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .parlay-legs {
+                border-top: 1px solid var(--border);
+                padding-top: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+            }
+
+            .parlay-leg {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 12px;
+                color: var(--muted);
+            }
+
+            .leg-dot {
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: var(--accent);
+                flex-shrink: 0;
+            }
+
+            .btn-block {
+                display: block;
+                width: 100%;
+                text-align: center;
+                margin-top: 4px;
+            }
+    </style>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <a class="logo" asp-controller="Home" asp-action="Index">
+            <div class="logo-dot"></div>
+            PropTracker
+        </a>
+        <ul class="nav-links">
+            <li><a asp-controller="Home" asp-action="Index" class="active">Dashboard</a></li>
+            <li><a asp-controller="Prop" asp-action="Index">Props</a></li>
+            <li><a asp-controller="Parlay" asp-action="Index">Parlays</a></li>
+        </ul>
+        <a class="nav-cta" asp-controller="Prop" asp-action="Create">+ Add Prop</a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-grid"></div>
+        <div class="hero-glow"></div>
+        <div class="hero-content">
+            <div class="hero-eyebrow">Your edge starts here</div>
+            <h1 class="hero-title">Track Props.<br><span>Build Parlays.</span></h1>
+            <p class="hero-sub">Log player prop bets, stack them into parlays, and keep your whole book in one place.</p>
+            <div class="hero-actions">
+                <a class="btn-primary" asp-controller="Prop" asp-action="Create">Add a Prop</a>
+                <a class="btn-secondary" asp-controller="Parlay" asp-action="Index">View Parlays</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+        <div class="stat-cell">
+            <div class="stat-label">Active Props</div>
+            <div class="stat-value">@ViewBag.PropCount</div>
+            <div class="stat-delta">Total logged</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-label">Parlays Built</div>
+            <div class="stat-value">@ViewBag.ParlayCount</div>
+            <div class="stat-delta">Total parlays</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-label">Top Multiplier</div>
+            <div class="stat-value green">
+                @(ViewBag.TopMulti != null ? $"{ViewBag.TopMulti}x" : "—")
+            </div>
+            <div class="stat-delta">Best parlay</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-label">Prop Types</div>
+            <div class="stat-value">10</div>
+            <div class="stat-delta">Available types</div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-layout">
+
+        <!-- RECENT PROPS -->
+        <section class="props-section">
+            <div class="section-header">
+                <div class="section-title">Recent Props</div>
+                <div class="badge">Latest</div>
+            </div>
+
+            @if (ViewBag.RecentProps != null && ((IEnumerable<Prop>)ViewBag.RecentProps).Any())
+            {
+                <div class="prop-list">
+                    @foreach (var prop in (IEnumerable<Prop>)ViewBag.RecentProps)
+                    {
+                        <a class="prop-card" asp-controller="Prop" asp-action="Details" asp-route-id="@prop.PropId">
+                            <div>
+                                <div class="prop-player">@prop.PlayerFirstName @prop.PlayerLastName</div>
+                                <div class="prop-meta">
+                                    Prop #@prop.PropId
+                                    @if (prop.ParlayId > 0)
+                                    {
+                                        <span> &middot; Parlay #@prop.ParlayId</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="prop-type">@prop.PropType.ToString()</div>
+                            <div class="prop-value-wrap">
+                                <div class="prop-value">@prop.PropValue.ToString("F1")</div>
+                                <div class="prop-value-label">Line</div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="icon">📋</div>
+                    <div>No props yet. Add your first one to get started.</div>
+                </div>
+            }
+        </section>
+
+        <!-- PARLAY SIDEBAR -->
+        <aside class="parlay-sidebar">
+            <div class="section-header">
+                <div class="section-title">Top Parlays</div>
+            </div>
+
+            @if (ViewBag.TopParlays != null && ((IEnumerable<PropTracker.Models.Parlay>)ViewBag.TopParlays).Any())
+            {
+                @foreach (var parlay in (IEnumerable<PropTracker.Models.Parlay>)ViewBag.TopParlays)
+                {
+                    <a class="parlay-card" asp-controller="Parlay" asp-action="Details" asp-route-id="@parlay.ParlayId">
+                        <div class="parlay-id-label">Parlay #@parlay.ParlayId</div>
+                        <div class="parlay-multi">
+                            <div class="parlay-multi-val">@parlay.Multi.ToString("F1")x</div>
+                            <div class="parlay-multi-label">Multi</div>
+                        </div>
+                        <div class="parlay-legs">
+                            @foreach (var propId in parlay.PropId)
+                            {
+                                <div class="parlay-leg">
+                                    <div class="leg-dot"></div>
+                                    Prop #@propId
+                                </div>
+                            }
+                        </div>
+                    </a>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="icon">🎯</div>
+                    <div>No parlays yet.</div>
+                </div>
+            }
+
+            <a class="btn-secondary btn-block" asp-controller="Parlay" asp-action="Create">+ Build New Parlay</a>
+        </aside>
+
+    </div>
+
+</body>
+</html>

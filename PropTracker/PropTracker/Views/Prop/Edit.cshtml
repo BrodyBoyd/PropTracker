@@ -1,0 +1,631 @@
+﻿@model Prop
+
+@{
+    ViewData["Title"] = "Edit Prop";
+
+    var displayMap = new Dictionary<Prop.BetType, (string Short, string Full)>
+    {
+        [Prop.BetType.PTS]       = ("PTS",  "Points"),
+        [Prop.BetType.PA]        = ("PA",   "Pts + Ast"),
+        [Prop.BetType.PR]        = ("PR",   "Pts + Reb"),
+        [Prop.BetType.AR]        = ("AR",   "Ast + Reb"),
+        [Prop.BetType.AST]       = ("AST",  "Assists"),
+        [Prop.BetType.REB]       = ("REB",  "Rebounds"),
+        [Prop.BetType.PRA]       = ("PRA",  "Pts+Reb+Ast"),
+        [Prop.BetType.THREEMADE] = ("3PM",  "Threes Made"),
+        [Prop.BetType.DD]        = ("DD",   "Double-Double"),
+        [Prop.BetType.TD]        = ("TD",   "Triple-Double"),
+    };
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PropTracker — Edit Prop #@Model.PropId</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --bg2: #12151c;
+            --bg3: #1a1e29;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.14);
+            --accent: #00e5a0;
+            --gold: #f5c842;
+            --text: #e8eaf2;
+            --muted: #7a7f94;
+            --red: #ff4d6d;
+            --error-bg: rgba(255,77,109,0.08);
+            --error-border: rgba(255,77,109,0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 1px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+
+        .nav-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--accent); }
+
+        .nav-back {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border2);
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: color .15s;
+        }
+
+        .nav-back:hover { color: var(--text); }
+
+        .page-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            min-height: calc(100vh - 53px);
+        }
+
+        .form-area { padding: 32px 36px; border-right: 1px solid var(--border); }
+
+        .page-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+
+        .page-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 42px;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 32px;
+        }
+
+        .section-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .divider { border: none; border-top: 1px solid var(--border); margin: 0 0 28px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+        .form-group { display: flex; flex-direction: column; gap: 7px; }
+
+        label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            font-size: 15px;
+            padding: 11px 14px;
+            outline: none;
+            transition: border-color .15s;
+            width: 100%;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus { border-color: var(--accent); }
+
+        input::placeholder { color: var(--muted); opacity: 1; }
+        input.input-error { border-color: var(--error-border) !important; background: var(--error-bg) !important; }
+
+        .field-validation-error { font-size: 12px; color: var(--red); margin-top: 4px; display: block; }
+
+        /* BET TYPE */
+        .bet-type-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+
+        .bet-type-btn {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--muted);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 11px 6px 9px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .15s;
+            user-select: none;
+        }
+
+        .bet-type-btn:hover { color: var(--text); }
+
+        .bet-type-btn.selected {
+            background: rgba(0,229,160,0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .bet-type-sub {
+            font-size: 9px;
+            font-family: 'Barlow', sans-serif;
+            font-weight: 400;
+            letter-spacing: 0;
+            color: var(--muted);
+            margin-top: 3px;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* VALUE */
+        .value-wrap { position: relative; }
+
+        .value-prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .value-input {
+            padding-left: 36px !important;
+            font-family: 'Barlow Condensed', sans-serif !important;
+            font-size: 22px !important;
+            font-weight: 700 !important;
+            color: var(--gold) !important;
+        }
+
+        /* PARLAY */
+        .toggle-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+
+        .toggle { position: relative; width: 42px; height: 24px; cursor: pointer; flex-shrink: 0; }
+        .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            transition: all .2s;
+        }
+
+        .slider:before {
+            content: '';
+            position: absolute;
+            width: 18px; height: 18px;
+            left: 2px; top: 2px;
+            background: var(--muted);
+            border-radius: 50%;
+            transition: all .2s;
+        }
+
+        .toggle input:checked + .slider { background: rgba(0,229,160,0.15); border-color: var(--accent); }
+        .toggle input:checked + .slider:before { transform: translateX(18px); background: var(--accent); }
+
+        .toggle-label { font-size: 15px; font-weight: 500; color: var(--text); }
+
+        .parlay-field { display: none; }
+        .parlay-field.visible { display: block; }
+
+        /* ACTIONS */
+        .form-actions { display: flex; gap: 12px; margin-top: 8px; }
+
+        .btn-save {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            flex: 1;
+            transition: opacity .2s, transform .15s;
+        }
+
+        .btn-save:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border2);
+            padding: 14px 22px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: color .15s;
+        }
+
+        .btn-cancel:hover { color: var(--text); }
+
+        /* PREVIEW SIDEBAR */
+        .preview-sidebar { padding: 28px 22px; background: var(--bg2); }
+
+        .preview-card {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .preview-tag {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .preview-player {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 26px;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 4px;
+            min-height: 30px;
+            color: var(--text);
+        }
+
+        .preview-player.placeholder { color: rgba(255,255,255,0.12); }
+
+        .preview-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .preview-type {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 5px;
+            letter-spacing: 1px;
+            min-width: 56px;
+            text-align: center;
+        }
+
+        .preview-value {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 30px;
+            color: var(--gold);
+        }
+
+        .preview-value.placeholder { color: rgba(255,255,255,0.12); }
+
+        .ref-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .change-notice {
+            background: rgba(245,200,66,0.08);
+            border: 1px solid rgba(245,200,66,0.2);
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 12px;
+            color: var(--gold);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a class="logo" asp-controller="Home" asp-action="Index">
+            <div class="logo-dot"></div>
+            PropTracker
+        </a>
+        <ul class="nav-links">
+            <li><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+            <li><a asp-controller="Prop" asp-action="Index" class="active">Props</a></li>
+            <li><a asp-controller="Parlay" asp-action="Index">Parlays</a></li>
+        </ul>
+        <a class="nav-back" asp-controller="Prop" asp-action="Details" asp-route-id="@Model.PropId">← Details</a>
+    </nav>
+
+    <div class="page-layout">
+        <div class="form-area">
+            <div class="page-eyebrow">Editing Prop #@Model.PropId</div>
+            <h1 class="page-title">Edit Prop</h1>
+            <div class="page-subtitle">@Model.PlayerFirstName @Model.PlayerLastName</div>
+
+            <form asp-action="Edit" asp-route-id="@Model.PropId" method="post" id="editForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="PropId" />
+                <input type="hidden" id="PropTypeHidden" asp-for="PropType" />
+
+                <!-- PLAYER INFO -->
+                <div class="section-label">Player Info</div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="PlayerFirstName">First Name</label>
+                        <input asp-for="PlayerFirstName"
+                               type="text"
+                               oninput="updatePreview()"
+                               class="@(ViewData.ModelState["PlayerFirstName"]?.Errors.Count > 0 ? "input-error" : "")" />
+                        <span asp-validation-for="PlayerFirstName" class="field-validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="PlayerLastName">Last Name</label>
+                        <input asp-for="PlayerLastName"
+                               type="text"
+                               oninput="updatePreview()"
+                               class="@(ViewData.ModelState["PlayerLastName"]?.Errors.Count > 0 ? "input-error" : "")" />
+                        <span asp-validation-for="PlayerLastName" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <hr class="divider" />
+
+                <!-- BET TYPE -->
+                <div class="section-label">Prop Type</div>
+
+                @if (ViewData.ModelState["PropType"]?.Errors.Count > 0)
+                {
+                    <div class="field-validation-error" style="margin-bottom:12px;">Please select a prop type.</div>
+                }
+
+                <div class="bet-type-grid">
+                    @foreach (Prop.BetType betType in Enum.GetValues(typeof(Prop.BetType)))
+                    {
+                        var info = displayMap[betType];
+                        var isSelected = Model.PropType == betType;
+
+                        <div class="bet-type-btn @(isSelected ? "selected" : "")"
+                             onclick="selectType('@betType.ToString()', '@info.Short')"
+                             data-value="@betType.ToString()">
+                            @info.Short
+                            <span class="bet-type-sub">@info.Full</span>
+                        </div>
+                    }
+                </div>
+
+                <hr class="divider" />
+
+                <!-- PROP VALUE -->
+                <div class="section-label">Prop Value</div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="PropValue">Over/Under Line</label>
+                        <div class="value-wrap">
+                            <span class="value-prefix">#</span>
+                            <input asp-for="PropValue"
+                                   type="number"
+                                   step="0.5"
+                                   min="0"
+                                   class="value-input @(ViewData.ModelState["PropValue"]?.Errors.Count > 0 ? "input-error" : "")"
+                                   oninput="updatePreview()" />
+                        </div>
+                        <span asp-validation-for="PropValue" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <hr class="divider" />
+
+                <!-- PARLAY -->
+                <div class="section-label">Parlay</div>
+
+                <div class="toggle-row">
+                    <label class="toggle">
+                        <input type="checkbox" id="parlayToggle"
+                               onchange="toggleParlay(this.checked)"
+                               @(Model.ParlayId > 0 ? "checked" : "") />
+                        <span class="slider"></span>
+                    </label>
+                    <span class="toggle-label">Add to a Parlay</span>
+                </div>
+
+                <div class="parlay-field @(Model.ParlayId > 0 ? "visible" : "")" id="parlayField">
+                    <div class="form-group">
+                        <label asp-for="ParlayId">Parlay ID</label>
+                        <input asp-for="ParlayId"
+                               type="number"
+                               placeholder="Enter existing Parlay ID"
+                               min="1"
+                               oninput="updatePreview()" />
+                        <span asp-validation-for="ParlayId" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="form-actions" style="margin-top:28px;">
+                    <button type="submit" class="btn-save">Save Changes →</button>
+                    <a class="btn-cancel"
+                       asp-controller="Prop"
+                       asp-action="Details"
+                       asp-route-id="@Model.PropId">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- PREVIEW SIDEBAR -->
+        <aside class="preview-sidebar">
+            <div class="ref-title" style="margin-bottom:14px;">Live Preview</div>
+
+            <div class="preview-card">
+                <div class="preview-tag">Prop #@Model.PropId &middot; <span id="prevParlay">@(Model.ParlayId > 0 ? "Parlay #" + Model.ParlayId : "No Parlay")</span></div>
+                <div class="preview-player @(string.IsNullOrWhiteSpace(Model.PlayerFirstName) ? "placeholder" : "")" id="prevPlayer">
+                    @(string.IsNullOrWhiteSpace(Model.PlayerFirstName) ? "Player Name" : $"{Model.PlayerFirstName} {Model.PlayerLastName}".ToUpper())
+                </div>
+                <div class="preview-row">
+                    <div class="preview-type" id="prevType">@displayMap[Model.PropType].Short</div>
+                    <div class="preview-value @(Model.PropValue == 0 ? "placeholder" : "")" id="prevValue">
+                        @(Model.PropValue > 0 ? Model.PropValue.ToString("F1") : "—")
+                    </div>
+                </div>
+            </div>
+
+            <div class="ref-title" style="margin-bottom:10px;">Note</div>
+            <div class="change-notice">
+                You are editing an existing prop. Changes will update it immediately when saved.
+            </div>
+        </aside>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+
+    <script>
+        let selectedTypeDisplay = '@displayMap[Model.PropType].Short';
+
+        function selectType(enumVal, displayShort) {
+            selectedTypeDisplay = displayShort;
+            document.getElementById('PropTypeHidden').value = enumVal;
+            document.querySelectorAll('.bet-type-btn').forEach(b => {
+                b.classList.toggle('selected', b.dataset.value === enumVal);
+            });
+            document.getElementById('prevType').textContent = displayShort;
+        }
+
+        function toggleParlay(on) {
+            document.getElementById('parlayField').classList.toggle('visible', on);
+            if (!on) document.getElementById('ParlayId').value = '';
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const fn  = document.getElementById('PlayerFirstName')?.value.trim() || '';
+            const ln  = document.getElementById('PlayerLastName')?.value.trim() || '';
+            const val = document.getElementById('PropValue')?.value || '';
+            const parlayOn = document.getElementById('parlayToggle')?.checked;
+            const parlayId = document.getElementById('ParlayId')?.value || '';
+
+            const playerEl = document.getElementById('prevPlayer');
+            const full = [fn, ln].filter(Boolean).join(' ').toUpperCase();
+            if (full) {
+                playerEl.textContent = full;
+                playerEl.classList.remove('placeholder');
+            } else {
+                playerEl.textContent = 'Player Name';
+                playerEl.classList.add('placeholder');
+            }
+
+            const valEl = document.getElementById('prevValue');
+            if (val && parseFloat(val) > 0) {
+                valEl.textContent = parseFloat(val).toFixed(1);
+                valEl.classList.remove('placeholder');
+            } else {
+                valEl.textContent = '—';
+                valEl.classList.add('placeholder');
+            }
+
+            const parlayLabel = document.getElementById('prevParlay');
+            if (parlayOn && parlayId) {
+                parlayLabel.textContent = 'Parlay #' + parlayId;
+            } else if (parlayOn) {
+                parlayLabel.textContent = 'Parlay (no ID)';
+            } else {
+                parlayLabel.textContent = 'No Parlay';
+            }
+        }
+    </script>
+
+</body>
+</html>

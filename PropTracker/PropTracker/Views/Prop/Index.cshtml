@@ -1,0 +1,710 @@
+﻿@model IEnumerable<PropTracker.Models.Prop>
+@using PropTracker.Models
+
+@{
+    ViewData["Title"] = "Props";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PropTracker — Props</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --bg2: #12151c;
+            --bg3: #1a1e29;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.14);
+            --accent: #00e5a0;
+            --gold: #f5c842;
+            --text: #e8eaf2;
+            --muted: #7a7f94;
+            --red: #ff4d6d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* NAV */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 1px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--accent); }
+
+        .nav-cta {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: opacity .2s;
+        }
+
+        .nav-cta:hover { opacity: 0.85; }
+
+        /* PAGE HEADER */
+        .page-header {
+            padding: 32px 32px 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .header-left {}
+
+        .page-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .page-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 42px;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+
+        .prop-count {
+            font-size: 15px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .prop-count span {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* TOOLBAR */
+        .toolbar {
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+            max-width: 340px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            padding: 9px 12px 9px 34px;
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        .search-input:focus { border-color: var(--accent); }
+        .search-input::placeholder { color: var(--muted); }
+
+        .filter-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            color: var(--muted);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 7px 12px;
+            cursor: pointer;
+            transition: all .15s;
+            user-select: none;
+        }
+
+        .filter-btn:hover { color: var(--text); border-color: var(--border2); }
+
+        .filter-btn.active {
+            background: rgba(0,229,160,0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .filter-btn.all.active {
+            background: rgba(255,255,255,0.06);
+            border-color: var(--border2);
+            color: var(--text);
+        }
+
+        .sort-select {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--muted);
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            padding: 9px 28px 9px 12px;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237a7f94' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            transition: border-color .15s;
+        }
+
+        .sort-select:focus { border-color: var(--accent); outline: none; }
+        .sort-select option { background: #1a1e29; color: #e8eaf2; }
+
+        /* TABLE */
+        .table-wrap {
+            padding: 24px 32px 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            border-bottom: 1px solid var(--border2);
+        }
+
+        th {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 0 16px 12px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th:first-child { padding-left: 0; }
+        th:last-child { padding-right: 0; text-align: right; }
+        th.right { text-align: right; }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+            cursor: pointer;
+        }
+
+        tbody tr:hover { background: var(--bg2); }
+        tbody tr:last-child { border-bottom: none; }
+
+        td {
+            padding: 14px 16px;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        td:first-child { padding-left: 0; }
+        td:last-child { padding-right: 0; text-align: right; }
+        td.right { text-align: right; }
+
+        .player-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 17px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text);
+        }
+
+        .prop-id {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .type-badge {
+            display: inline-block;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .prop-val {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--gold);
+        }
+
+        .parlay-link {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            background: rgba(0,229,160,0.08);
+            border: 1px solid rgba(0,229,160,0.2);
+            padding: 3px 9px;
+            border-radius: 4px;
+            transition: background .15s;
+        }
+
+        .parlay-link:hover { background: rgba(0,229,160,0.15); }
+
+        .no-parlay {
+            font-size: 12px;
+            color: var(--border2);
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-edit {
+            background: transparent;
+            border: 1px solid var(--border2);
+            color: var(--muted);
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: color .15s, border-color .15s;
+        }
+
+        .btn-edit:hover { color: var(--text); border-color: var(--text); }
+
+        .btn-delete {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--muted);
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: color .15s, border-color .15s, background .15s;
+        }
+
+        .btn-delete:hover {
+            color: var(--red);
+            border-color: rgba(255,77,109,0.3);
+            background: rgba(255,77,109,0.06);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 22px;
+            text-transform: uppercase;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .empty-sub {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            transition: opacity .2s;
+        }
+
+        .btn-primary:hover { opacity: 0.85; }
+
+        /* NO RESULTS (JS hidden rows) */
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+
+        .result-badge {
+            display: inline-flex;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 3px 9px;
+            border-radius: 4px;
+        }
+        .result-badge.pending { background: rgba(122,127,148,0.1); border: 1px solid rgba(122,127,148,0.2); color: var(--muted); }
+        .result-badge.hit     { background: rgba(0,229,160,0.1);   border: 1px solid rgba(0,229,160,0.25); color: var(--accent); }
+        .result-badge.miss    { background: rgba(255,77,109,0.1);   border: 1px solid rgba(255,77,109,0.3); color: var(--red); }
+
+        .row-hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <a class="logo" asp-controller="Home" asp-action="Index">
+            <div class="logo-dot"></div>
+            PropTracker
+        </a>
+        <ul class="nav-links">
+            <li><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+            <li><a asp-controller="Prop" asp-action="Index" class="active">Props</a></li>
+            <li><a asp-controller="Parlay" asp-action="Index">Parlays</a></li>
+        </ul>
+        <a class="nav-cta" asp-controller="Prop" asp-action="Create">+ Add Prop</a>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="page-eyebrow">All Entries</div>
+            <h1 class="page-title">Props</h1>
+            <div class="prop-count">
+                <span id="visibleCount">@Model.Count()</span> of @Model.Count() props
+            </div>
+        </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input class="search-input"
+                   type="text"
+                   id="searchInput"
+                   placeholder="Search player name..."
+                   oninput="applyFilters()" />
+        </div>
+
+        <div class="filter-group" id="typeFilters">
+            <button class="filter-btn all active" onclick="setTypeFilter('ALL', this)">All</button>
+            @foreach (Prop.BetType betType in Enum.GetValues(typeof(Prop.BetType)))
+            {
+                var displayMap = new Dictionary<Prop.BetType, string>
+                {
+                    [Prop.BetType.PTS]       = "PTS",
+                    [Prop.BetType.PA]        = "PA",
+                    [Prop.BetType.PR]        = "PR",
+                    [Prop.BetType.AR]        = "AR",
+                    [Prop.BetType.AST]       = "AST",
+                    [Prop.BetType.REB]       = "REB",
+                    [Prop.BetType.PRA]       = "PRA",
+                    [Prop.BetType.THREEMADE] = "3PM",
+                    [Prop.BetType.DD]        = "DD",
+                    [Prop.BetType.TD]        = "TD",
+                };
+                <button class="filter-btn"
+                        data-type="@betType.ToString()"
+                        onclick="setTypeFilter('@betType.ToString()', this)">
+                    @displayMap[betType]
+                </button>
+            }
+        </div>
+
+        <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+            <option value="default">Sort: Default</option>
+            <option value="name-asc">Name A–Z</option>
+            <option value="name-desc">Name Z–A</option>
+            <option value="value-desc">Value High–Low</option>
+            <option value="value-asc">Value Low–High</option>
+            <option value="parlay">By Parlay</option>
+        </select>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-title">No Props Yet</div>
+                <div class="empty-sub">Start tracking by adding your first player prop.</div>
+                <a class="btn-primary" asp-controller="Prop" asp-action="Create">+ Add First Prop</a>
+            </div>
+        }
+        else
+        {
+            <table id="propTable">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Type</th>
+                        <th class="right">Line</th>
+                        <th>Parlay</th>
+                        <th class="right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="propTableBody">
+                    @foreach (var prop in Model)
+                    {
+                        var displayMap = new Dictionary<Prop.BetType, string>
+                        {
+                            [Prop.BetType.PTS]       = "PTS",
+                            [Prop.BetType.PA]        = "PA",
+                            [Prop.BetType.PR]        = "PR",
+                            [Prop.BetType.AR]        = "AR",
+                            [Prop.BetType.AST]       = "AST",
+                            [Prop.BetType.REB]       = "REB",
+                            [Prop.BetType.PRA]       = "PRA",
+                            [Prop.BetType.THREEMADE] = "3PM",
+                            [Prop.BetType.DD]        = "DD",
+                            [Prop.BetType.TD]        = "TD",
+                        };
+
+                        <tr class="prop-row"
+                            data-name="@($"{prop.PlayerFirstName} {prop.PlayerLastName}".ToLower())"
+                            data-type="@prop.PropType.ToString()"
+                            data-value="@prop.PropValue"
+                            data-parlay="@prop.ParlayId"
+                            onclick="window.location='@Url.Action("Details", "Prop", new { id = prop.PropId })'">
+                            <td>
+                                <div class="player-name">@prop.PlayerFirstName @prop.PlayerLastName</div>
+                                <div class="prop-id">#@prop.PropId</div>
+                            </td>
+                            <td>
+                                <span class="type-badge">@displayMap[prop.PropType]</span>
+                            </td>
+                            <td class="right">
+                                <span class="prop-val">@prop.PropValue.ToString("F1")</span>
+                            </td>
+                            <td>
+                                @if (prop.ParlayId > 0)
+                                {
+                                    <a class="parlay-link"
+                                       asp-controller="Parlay"
+                                       asp-action="Details"
+                                       asp-route-id="@prop.ParlayId"
+                                       onclick="event.stopPropagation()">
+                                        Parlay #@prop.ParlayId
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="no-parlay">—</span>
+                                }
+                            </td>
+                            <td>
+                                @{
+                                    var rc = prop.Result switch
+                                    {
+                                        Prop.PropResult.Hit  => "hit",
+                                        Prop.PropResult.Miss => "miss",
+                                        _                    => "pending"
+                                    };
+                                }
+                                <span class="result-badge @rc">@prop.Result.ToString()</span>
+                            </td>
+                            <td>
+                                <div class="actions" onclick="event.stopPropagation()">
+                                    <a class="btn-edit"
+                                       asp-controller="Prop"
+                                       asp-action="Edit"
+                                       asp-route-id="@prop.PropId">Edit</a>
+                                    <form asp-controller="Prop"
+                                          asp-action="Delete"
+                                          asp-route-id="@prop.PropId"
+                                          method="post"
+                                          style="display:inline"
+                                          onsubmit="return confirm('Delete prop for @prop.PlayerFirstName @prop.PlayerLastName?')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-delete">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="no-results" id="noResults">
+                No props match your search or filter.
+            </div>
+        }
+
+    </div>
+
+    <script>
+        const totalCount = @Model.Count();
+        let activeType = 'ALL';
+
+        function setTypeFilter(type, btn) {
+            activeType = type;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const sort = document.getElementById('sortSelect').value;
+            const rows = Array.from(document.querySelectorAll('.prop-row'));
+
+            // Filter
+            let visible = rows.filter(row => {
+                const nameMatch = !query || row.dataset.name.includes(query);
+                const typeMatch = activeType === 'ALL' || row.dataset.type === activeType;
+                return nameMatch && typeMatch;
+            });
+
+            const hidden = rows.filter(r => !visible.includes(r));
+
+            // Sort
+            visible.sort((a, b) => {
+                switch (sort) {
+                    case 'name-asc':
+                        return a.dataset.name.localeCompare(b.dataset.name);
+                    case 'name-desc':
+                        return b.dataset.name.localeCompare(a.dataset.name);
+                    case 'value-desc':
+                        return parseFloat(b.dataset.value) - parseFloat(a.dataset.value);
+                    case 'value-asc':
+                        return parseFloat(a.dataset.value) - parseFloat(b.dataset.value);
+                    case 'parlay':
+                        return parseInt(b.dataset.parlay) - parseInt(a.dataset.parlay);
+                    default:
+                        return 0;
+                }
+            });
+
+            // Apply visibility
+            hidden.forEach(r => r.classList.add('row-hidden'));
+
+            const tbody = document.getElementById('propTableBody');
+            visible.forEach(r => {
+                r.classList.remove('row-hidden');
+                tbody.appendChild(r);
+            });
+
+            // Update count
+            document.getElementById('visibleCount').textContent = visible.length;
+
+            // No results message
+            const noResults = document.getElementById('noResults');
+            if (noResults) noResults.style.display = visible.length === 0 ? 'block' : 'none';
+        }
+    </script>
+
+</body>
+</html>

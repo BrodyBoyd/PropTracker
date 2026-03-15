@@ -1,0 +1,995 @@
+﻿@model Parlay
+
+@{
+    ViewData["Title"] = "Build Parlay";
+    var availableProps = ViewBag.AvailableProps as IEnumerable<Prop> ?? Enumerable.Empty<Prop>();
+
+    var displayMap = new Dictionary<Prop.BetType, string>
+    {
+        [Prop.BetType.PTS]       = "PTS",
+        [Prop.BetType.PA]        = "PA",
+        [Prop.BetType.PR]        = "PR",
+        [Prop.BetType.AR]        = "AR",
+        [Prop.BetType.AST]       = "AST",
+        [Prop.BetType.REB]       = "REB",
+        [Prop.BetType.PRA]       = "PRA",
+        [Prop.BetType.THREEMADE] = "3PM",
+        [Prop.BetType.DD]        = "DD",
+        [Prop.BetType.TD]        = "TD",
+    };
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PropTracker — Build Parlay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --bg2: #12151c;
+            --bg3: #1a1e29;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.14);
+            --accent: #00e5a0;
+            --gold: #f5c842;
+            --text: #e8eaf2;
+            --muted: #7a7f94;
+            --red: #ff4d6d;
+            --error-bg: rgba(255,77,109,0.08);
+            --error-border: rgba(255,77,109,0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* NAV */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 1px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+
+        .nav-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--accent); }
+
+        .nav-back {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border2);
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: color .15s;
+        }
+
+        .nav-back:hover { color: var(--text); }
+
+        /* LAYOUT */
+        .page-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            min-height: calc(100vh - 53px);
+        }
+
+        .form-area {
+            padding: 32px 36px;
+            border-right: 1px solid var(--border);
+        }
+
+        .page-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .page-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 42px;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            margin-bottom: 32px;
+        }
+
+        .section-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0 0 28px;
+        }
+
+        /* MULTIPLIER */
+        .multi-wrap { position: relative; margin-bottom: 10px; max-width: 240px; }
+
+        .multi-prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .multi-suffix {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        input[type="number"] {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--gold);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            padding: 11px 44px 11px 40px;
+            outline: none;
+            transition: border-color .15s;
+            width: 100%;
+        }
+
+        input[type="number"]:focus { border-color: var(--accent); }
+        input[type="number"]::placeholder { color: var(--border2); font-size: 22px; }
+        input[type="number"].input-error { border-color: var(--error-border); background: var(--error-bg); }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 7px;
+            margin-bottom: 28px;
+        }
+
+        .field-validation-error {
+            font-size: 12px;
+            color: var(--red);
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* ── PROP PICKER ─────────────────────────── */
+        .prop-picker { margin-bottom: 28px; }
+
+        .picker-search-wrap {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .picker-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .picker-search {
+            width: 100%;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            padding: 10px 12px 10px 34px;
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        .picker-search:focus { border-color: var(--accent); }
+        .picker-search::placeholder { color: var(--muted); }
+
+        /* Type filter pills */
+        .picker-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .pf-btn {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            color: var(--muted);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all .15s;
+            user-select: none;
+        }
+
+        .pf-btn:hover { color: var(--text); }
+
+        .pf-btn.active {
+            background: rgba(0,229,160,0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .pf-btn.all.active {
+            background: rgba(255,255,255,0.06);
+            border-color: var(--border2);
+            color: var(--text);
+        }
+
+        /* Prop list */
+        .picker-list {
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .picker-list::-webkit-scrollbar { width: 4px; }
+        .picker-list::-webkit-scrollbar-track { background: transparent; }
+        .picker-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+        .picker-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg2);
+            transition: background .15s;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .picker-row:last-child { border-bottom: none; }
+        .picker-row:hover { background: var(--bg3); }
+
+        .picker-row.selected {
+            background: rgba(0,229,160,0.05);
+        }
+
+        .picker-row.hidden-row { display: none; }
+
+        .picker-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .picker-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1.5px solid var(--border2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all .15s;
+            font-size: 11px;
+            color: transparent;
+        }
+
+        .picker-row.selected .picker-check {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .picker-player {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .picker-meta {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 1px;
+        }
+
+        .picker-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .picker-type {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 3px;
+            letter-spacing: 1px;
+        }
+
+        .picker-val {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--gold);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .picker-empty {
+            padding: 28px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .picker-no-props {
+            padding: 28px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+            background: var(--bg2);
+        }
+
+        /* Selected legs pills */
+        .selected-legs-wrap { margin-top: 14px; }
+
+        .selected-legs-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .legs-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            min-height: 32px;
+        }
+
+        .leg-pill {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 5px 6px 5px 12px;
+            animation: pillIn .15s ease;
+        }
+
+        
+
+        .leg-pill-player {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .leg-pill-type {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+        }
+
+        .leg-remove {
+            background: rgba(255,77,109,0.1);
+            border: none;
+            border-radius: 50%;
+            color: var(--red);
+            font-size: 12px;
+            line-height: 1;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .15s;
+            flex-shrink: 0;
+        }
+
+        .leg-remove:hover { background: rgba(255,77,109,0.25); }
+
+        .legs-pills-empty {
+            font-size: 12px;
+            color: var(--border2);
+            padding: 4px 0;
+        }
+
+        .leg-count-badge {
+            background: rgba(0,229,160,0.1);
+            border: 1px solid rgba(0,229,160,0.2);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        /* SUBMIT */
+        .form-actions { display: flex; gap: 12px; margin-top: 8px; }
+
+        .btn-submit {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            flex: 1;
+            transition: opacity .2s, transform .15s;
+        }
+
+        .btn-submit:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border2);
+            padding: 14px 22px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: color .15s;
+        }
+
+        .btn-cancel:hover { color: var(--text); }
+
+        /* PREVIEW SIDEBAR */
+        .preview-sidebar {
+            padding: 28px 22px;
+            background: var(--bg2);
+        }
+
+        .preview-card {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .preview-tag {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        .preview-multi-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .preview-multi-val {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 48px;
+            color: var(--gold);
+            line-height: 1;
+        }
+
+        .preview-multi-val.placeholder { color: rgba(255,255,255,0.1); }
+
+        .preview-multi-label {
+            font-size: 13px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preview-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0 0 14px;
+        }
+
+        .preview-legs { display: flex; flex-direction: column; gap: 8px; }
+
+        .preview-leg {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .preview-leg-left {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-width: 0;
+        }
+
+        .preview-leg-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .preview-leg-player {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preview-leg-type {
+            font-size: 10px;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .preview-leg-val {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+
+        .preview-legs-empty { font-size: 12px; color: var(--border2); }
+
+        .ref-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .tip-row {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .tip-dot { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a class="logo" asp-controller="Home" asp-action="Index">
+            <div class="logo-dot"></div>
+            PropTracker
+        </a>
+        <ul class="nav-links">
+            <li><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+            <li><a asp-controller="Prop" asp-action="Index">Props</a></li>
+            <li><a asp-controller="Parlay" asp-action="Index" class="active">Parlays</a></li>
+        </ul>
+        <a class="nav-back" asp-controller="Parlay" asp-action="Index">← Parlays</a>
+    </nav>
+
+    <div class="page-layout">
+        <div class="form-area">
+            <div class="page-eyebrow">New Entry</div>
+            <h1 class="page-title">Build Parlay</h1>
+
+            <form asp-action="Create" method="post" id="parlayForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Hidden: comma-separated prop IDs built by JS, read by controller -->
+                <input type="hidden" id="PropIdsHidden" name="PropIdsRaw" value="" />
+
+                <!-- MULTIPLIER -->
+                <div class="section-label">Multiplier</div>
+
+                <div class="multi-wrap">
+                    <span class="multi-prefix">×</span>
+                    <input asp-for="Multi"
+                           type="number"
+                           placeholder="0.0"
+                           step="0.01"
+                           min="1"
+                           oninput="updatePreview()"
+                           class="@(ViewData.ModelState["Multi"]?.Errors.Count > 0 ? "input-error" : "")" />
+                    <span class="multi-suffix">x</span>
+                </div>
+                <span asp-validation-for="Multi" class="field-validation-error"></span>
+                <div class="form-hint">Enter the total payout multiplier (e.g. 3.5 for 3.5×).</div>
+
+                <hr class="divider" />
+
+                <!-- PROP LEGS -->
+                <div class="section-label">
+                    Prop Legs
+                    <span class="leg-count-badge" id="legCountBadge">0 selected</span>
+                </div>
+
+                @if (ViewData.ModelState["PropIdsRaw"]?.Errors.Count > 0 ||
+                     ViewData.ModelState["PropId"]?.Errors.Count > 0)
+                {
+                    <div class="field-validation-error" style="margin-bottom:12px;">
+                        @(ViewData.ModelState["PropIdsRaw"]?.Errors.FirstOrDefault()?.ErrorMessage
+                          ?? ViewData.ModelState["PropId"]?.Errors.FirstOrDefault()?.ErrorMessage)
+                    </div>
+                }
+
+                <div class="prop-picker">
+
+                    <!-- Search -->
+                    <div class="picker-search-wrap">
+                        <span class="picker-search-icon">⌕</span>
+                        <input type="text"
+                               class="picker-search"
+                               id="pickerSearch"
+                               placeholder="Search by player name..."
+                               oninput="filterPicker()" />
+                    </div>
+
+                    <!-- Type filters -->
+                    <div class="picker-filters">
+                        <button type="button" class="pf-btn all active" onclick="setPickerType('ALL', this)">All</button>
+                        @foreach (Prop.BetType betType in Enum.GetValues(typeof(Prop.BetType)))
+                        {
+                            <button type="button"
+                                    class="pf-btn"
+                                    data-type="@betType.ToString()"
+                                    onclick="setPickerType('@betType.ToString()', this)">
+                                @displayMap[betType]
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Scrollable prop list -->
+                    <div class="picker-list" id="pickerList">
+                        @if (!availableProps.Any())
+                        {
+                            <div class="picker-no-props">
+                                No props yet. <a asp-controller="Prop" asp-action="Create" style="color:var(--accent);">Add some props first.</a>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var prop in availableProps)
+                            {
+                                <div class="picker-row"
+                                     id="picker-row-@prop.PropId"
+                                     data-id="@prop.PropId"
+                                     data-name="@($"{prop.PlayerFirstName} {prop.PlayerLastName}".ToLower())"
+                                     data-type="@prop.PropType.ToString()"
+                                     data-player="@prop.PlayerFirstName @prop.PlayerLastName"
+                                     data-bettype="@displayMap[prop.PropType]"
+                                     data-value="@prop.PropValue.ToString("F1")"
+                                     onclick="toggleProp(this)">
+                                    <div class="picker-left">
+                                        <div class="picker-check" id="check-@prop.PropId">✓</div>
+                                        <div>
+                                            <div class="picker-player">@prop.PlayerFirstName @prop.PlayerLastName</div>
+                                            <div class="picker-meta">#@prop.PropId</div>
+                                        </div>
+                                    </div>
+                                    <div class="picker-right">
+                                        <span class="picker-type">@displayMap[prop.PropType]</span>
+                                        <span class="picker-val">@prop.PropValue.ToString("F1")</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <!-- No search results -->
+                    <div class="picker-empty" id="pickerEmpty" style="display:none;">
+                        No props match your search.
+                    </div>
+
+                    <!-- Selected pills -->
+                    <div class="selected-legs-wrap">
+                        <div class="selected-legs-label">Selected legs</div>
+                        <div class="legs-pills" id="legsPills">
+                            <span class="legs-pills-empty">Click props above to add them.</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr class="divider" />
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Save Parlay →</button>
+                    <a class="btn-cancel" asp-controller="Parlay" asp-action="Index">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- PREVIEW SIDEBAR -->
+        <aside class="preview-sidebar">
+            <div class="ref-title" style="margin-bottom:14px;">Live Preview</div>
+
+            <div class="preview-card">
+                <div class="preview-tag">Parlay</div>
+                <div class="preview-multi-row">
+                    <div class="preview-multi-val placeholder" id="prevMulti">—</div>
+                    <div class="preview-multi-label">×</div>
+                </div>
+                <hr class="preview-divider" />
+                <div class="preview-legs" id="prevLegs">
+                    <div class="preview-legs-empty">Select props to see them here.</div>
+                </div>
+            </div>
+
+            <div class="ref-title">Tips</div>
+            <div>
+                <div class="tip-row">
+                    <span class="tip-dot">•</span>
+                    <span>Click any prop row to add it as a leg. Click again or hit ✕ to remove it.</span>
+                </div>
+                <div class="tip-row">
+                    <span class="tip-dot">•</span>
+                    <span>Use the search bar and type filters to find props quickly.</span>
+                </div>
+                <div class="tip-row">
+                    <span class="tip-dot">•</span>
+                    <span>After saving, each prop's ParlayId will be updated to link back to this parlay.</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+
+    <script>
+        // legs = [{ id, player, betType, value }]
+        let legs = [];
+        let activeTypeFilter = 'ALL';
+
+        // Restore selected legs if model was returned with validation errors
+        (function () {
+            const raw = document.getElementById('PropIdsHidden').value;
+            if (!raw) return;
+            raw.split(',').filter(Boolean).forEach(idStr => {
+                const id = parseInt(idStr.trim());
+                const row = document.getElementById('picker-row-' + id);
+                if (row && !isNaN(id)) {
+                    legs.push({
+                        id: id,
+                        player: row.dataset.player,
+                        betType: row.dataset.bettype,
+                        value: row.dataset.value
+                    });
+                    row.classList.add('selected');
+                }
+            });
+            syncAll();
+        })();
+
+        function toggleProp(row) {
+            const id = parseInt(row.dataset.id);
+            const already = legs.find(l => l.id === id);
+
+            if (already) {
+                legs = legs.filter(l => l.id !== id);
+                row.classList.remove('selected');
+            } else {
+                legs.push({
+                    id: id,
+                    player: row.dataset.player,
+                    betType: row.dataset.bettype,
+                    value: row.dataset.value
+                });
+                row.classList.add('selected');
+            }
+
+            syncAll();
+        }
+
+        function removeLeg(id) {
+            legs = legs.filter(l => l.id !== id);
+            const row = document.getElementById('picker-row-' + id);
+            if (row) row.classList.remove('selected');
+            syncAll();
+        }
+
+        function syncAll() {
+            document.getElementById('PropIdsHidden').value = legs.map(l => l.id).join(',');
+            renderPills();
+            updatePreview();
+            document.getElementById('legCountBadge').textContent =
+                legs.length + (legs.length === 1 ? ' selected' : ' selected');
+        }
+
+        function renderPills() {
+            const container = document.getElementById('legsPills');
+            if (legs.length === 0) {
+                container.innerHTML = '<span class="legs-pills-empty">Click props above to add them.</span>';
+                return;
+            }
+            container.innerHTML = legs.map(l => `
+                <div class="leg-pill">
+                    <span class="leg-pill-player">${esc(l.player)}</span>
+                    <span class="leg-pill-type">${esc(l.betType)}</span>
+                    <button type="button" class="leg-remove" onclick="removeLeg(${l.id})" title="Remove">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function updatePreview() {
+            const multiVal = document.getElementById('Multi')?.value || '';
+            const multiEl = document.getElementById('prevMulti');
+
+            if (multiVal && parseFloat(multiVal) > 0) {
+                multiEl.textContent = parseFloat(multiVal).toFixed(2) + '×';
+                multiEl.classList.remove('placeholder');
+            } else {
+                multiEl.textContent = '—';
+                multiEl.classList.add('placeholder');
+            }
+
+            const legsEl = document.getElementById('prevLegs');
+            if (legs.length === 0) {
+                legsEl.innerHTML = '<div class="preview-legs-empty">Select props to see them here.</div>';
+            } else {
+                legsEl.innerHTML = legs.map(l => `
+                    <div class="preview-leg">
+                        <div class="preview-leg-left">
+                            <div class="preview-leg-dot"></div>
+                            <span class="preview-leg-player">${esc(l.player)}</span>
+                            <span class="preview-leg-type">${esc(l.betType)}</span>
+                        </div>
+                        <span class="preview-leg-val">${esc(l.value)}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function setPickerType(type, btn) {
+            activeTypeFilter = type;
+            document.querySelectorAll('.pf-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterPicker();
+        }
+
+        function filterPicker() {
+            const query = document.getElementById('pickerSearch').value.trim().toLowerCase();
+            const rows  = document.querySelectorAll('.picker-row');
+            let anyVisible = false;
+
+            rows.forEach(row => {
+                const nameMatch = !query || row.dataset.name.includes(query);
+                const typeMatch = activeTypeFilter === 'ALL' || row.dataset.type === activeTypeFilter;
+                const show = nameMatch && typeMatch;
+                row.classList.toggle('hidden-row', !show);
+                if (show) anyVisible = true;
+            });
+
+            document.getElementById('pickerEmpty').style.display = anyVisible ? 'none' : 'block';
+        }
+
+        function esc(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+
+</body>
+</html>
