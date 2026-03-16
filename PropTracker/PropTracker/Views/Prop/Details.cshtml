@@ -614,6 +614,19 @@
                     </td>
                 </tr>
                 <tr>
+                    <td class="field-label">Game Date</td>
+                    <td class="field-value">
+                        @if (Model.GameDate.HasValue)
+                        {
+                            <span>@Model.GameDate.Value.ToString("MMMM d, yyyy")</span>
+                        }
+                        else
+                        {
+                            <span style="color:var(--muted)">Not set — using most recent game</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
                     <td class="field-label">Parlay ID</td>
                     <td class="field-value">
                         @if (Model.ParlayId > 0)

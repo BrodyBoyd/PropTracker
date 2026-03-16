@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PropTracker.Models;
 
@@ -11,9 +12,11 @@ using PropTracker.Models;
 namespace PropTracker.Migrations
 {
     [DbContext(typeof(PropContext))]
-    partial class PropContextModelSnapshot : ModelSnapshot
+    [Migration("20260316045742_AddGameDate")]
+    partial class AddGameDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -232,19 +235,18 @@ namespace PropTracker.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ParlayId"));
 
-                    b.Property<string>("HitAt")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("HitAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<double>("Multi")
                         .HasColumnType("float");
 
-                    b.Property<string>("PropId")
+                    b.PrimitiveCollection<string>("PropId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Result")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Result")
+                        .HasColumnType("int");
 
                     b.HasKey("ParlayId");
 
@@ -265,12 +267,11 @@ namespace PropTracker.Migrations
                     b.Property<int>("BdlPlayerId")
                         .HasColumnType("int");
 
-                    b.Property<string>("GameDate")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("GameDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("OverUnder")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("OverUnder")
+                        .HasColumnType("int");
 
                     b.Property<int>("ParlayId")
                         .HasColumnType("int");
@@ -283,16 +284,14 @@ namespace PropTracker.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PropType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PropType")
+                        .HasColumnType("int");
 
                     b.Property<double>("PropValue")
                         .HasColumnType("float");
 
-                    b.Property<string>("Result")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Result")
+                        .HasColumnType("int");
 
                     b.HasKey("PropId");
 

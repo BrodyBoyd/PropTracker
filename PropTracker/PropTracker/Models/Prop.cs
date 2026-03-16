@@ -15,6 +15,10 @@
         // Used by NbaStatsService to fetch game logs and auto-check pending props.
         public int BdlPlayerId { get; set; }
 
+        // The date of the game this prop is for. Used by CheckPropResultAsync to
+        // look up the exact game rather than just the most recent one.
+        public DateTime? GameDate { get; set; }
+
         public enum BetType
         {
             PTS,

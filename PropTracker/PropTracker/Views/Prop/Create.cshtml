@@ -168,6 +168,21 @@
         input[type="text"]:focus,
         input[type="number"]:focus { border-color: var(--accent); }
         input::placeholder { color: var(--muted); opacity: 1; }
+        /* DATE PICKER */
+        input[type="date"] {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            font-size: 15px;
+            padding: 11px 14px;
+            outline: none;
+            transition: border-color .15s;
+            width: 100%;
+            color-scheme: dark;
+        }
+        input[type="date"]:focus { border-color: var(--accent); }
         input.input-error { border-color: var(--error-border) !important; background: var(--error-bg) !important; }
 
         .field-validation-error { font-size: 12px; color: var(--red); margin-top: 4px; display: block; }
@@ -204,7 +219,6 @@
             animation: spin .6s linear infinite;
             display: none;
         }
-
 
         .player-dropdown {
             position: absolute;
@@ -601,6 +615,7 @@
                 <input type="hidden" asp-for="PropType"  id="PropTypeHidden" />
                 <input type="hidden" asp-for="OverUnder" id="OverUnderHidden" value="Over" />
                 <input type="hidden" asp-for="BdlPlayerId" id="BdlPlayerIdHidden" />
+                <input type="hidden" asp-for="GameDate" id="GameDateHidden" />
 
                 <!-- PLAYER SEARCH -->
                 <div class="section-label">Player</div>
@@ -697,7 +712,7 @@
                     <div class="field-validation-error" style="margin-bottom:12px;">Please select Over or Under.</div>
                 }
 
-                <div class="value-ou-row">
+                <div class="value-ou-row" style="grid-template-columns: 1fr auto 1fr;">
                     <div class="form-group">
                         <label asp-for="PropValue">Line</label>
                         <div class="value-wrap">
@@ -725,6 +740,16 @@
                                     id="ouUnder"
                                     onclick="selectOU('Under')">Under</button>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="GameDate">Game Date</label>
+                        <input type="date"
+                               id="GameDatePicker"
+                               value="@(Model?.GameDate.HasValue == true ? Model.GameDate.Value.ToString("yyyy-MM-dd") : "")"
+                               onchange="setGameDate(this.value)"
+                               max="@DateTime.Today.AddDays(7).ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="GameDate" class="field-validation-error"></span>
+                        <span style="font-size:11px;color:var(--muted);margin-top:4px;">Used to check the exact game</span>
                     </div>
                 </div>
 
@@ -765,7 +790,7 @@
             <div class="ref-title" style="margin-bottom:14px;">Live Preview</div>
 
             <div class="preview-card">
-                <div class="preview-tag">Prop &middot; <span id="prevParlay">No Parlay</span></div>
+                <div class="preview-tag">Prop &middot; <span id="prevParlay">No Parlay</span> &middot; <span id="prevDate">No date</span></div>
                 <div class="preview-player placeholder" id="prevPlayer">Player Name</div>
                 <div class="preview-row">
                     <div class="preview-type" id="prevType">—</div>
@@ -819,6 +844,19 @@
                 document.getElementById('parlayToggle').checked = true;
                 document.getElementById('parlayField').classList.add('visible');
             }
+
+            // Restore game date picker from hidden field on validation failure
+            const gameDateHidden = document.getElementById('GameDateHidden');
+            if (gameDateHidden?.value) {
+                const d = new Date(gameDateHidden.value);
+                if (!isNaN(d)) {
+                    const yyyy = d.getFullYear();
+                    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd   = String(d.getDate()).padStart(2, '0');
+                    document.getElementById('GameDatePicker').value = `${yyyy}-${mm}-${dd}`;
+                }
+            }
+
             updatePreview();
         })();
 
@@ -915,6 +953,11 @@
 
         // ── Parlay toggle ────────────────────────────────────────────────
 
+        function setGameDate(val) {
+            document.getElementById('GameDateHidden').value = val ? new Date(val + 'T00:00:00').toISOString() : '';
+            updatePreview();
+        }
+
         function toggleParlay(on) {
             document.getElementById('parlayField').classList.toggle('visible', on);
             if (!on) document.getElementById('ParlayId').value = '';
@@ -952,6 +995,15 @@
             if (parlayOn && parlayId)  parlayLabel.textContent = 'Parlay #' + parlayId;
             else if (parlayOn)         parlayLabel.textContent = 'Parlay (no ID)';
             else                       parlayLabel.textContent = 'No Parlay';
+
+            const dateVal = document.getElementById('GameDatePicker')?.value;
+            const dateLabel = document.getElementById('prevDate');
+            if (dateVal) {
+                const d = new Date(dateVal + 'T00:00:00');
+                dateLabel.textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            } else {
+                dateLabel.textContent = 'No date';
+            }
         }
 
         function esc(str) {
