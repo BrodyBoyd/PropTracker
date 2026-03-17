@@ -475,6 +475,20 @@
         <a class="nav-cta" asp-controller="Prop" asp-action="Create">+ Add Prop</a>
     </nav>
 
+    <!-- FLASH MESSAGES -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background:rgba(0,229,160,0.08);border-bottom:1px solid rgba(0,229,160,0.2);padding:12px 32px;font-size:13px;color:var(--accent);display:flex;align-items:center;gap:8px;">
+            <span style="font-weight:700;">✓</span> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div style="background:rgba(255,77,109,0.08);border-bottom:1px solid rgba(255,77,109,0.2);padding:12px 32px;font-size:13px;color:var(--red);display:flex;align-items:center;gap:8px;">
+            <span style="font-weight:700;">!</span> @TempData["ErrorMessage"]
+        </div>
+    }
+
     <!-- PAGE HEADER -->
     <div class="page-header">
         <div class="header-left">

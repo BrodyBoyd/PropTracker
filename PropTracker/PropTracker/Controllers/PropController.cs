@@ -168,37 +168,61 @@ namespace PropTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CheckPending()
         {
+            // Pull pending props into memory — EF tracks these objects
             var pendingProps = _context.Props
                 .Where(p => p.Result == Prop.PropResult.Pending && p.BdlPlayerId > 0)
                 .ToList();
 
             int updated = 0;
+            var errors = new List<string>();
 
             foreach (var prop in pendingProps)
             {
                 try
                 {
                     var result = await _nbaStats.CheckPropResultAsync(prop);
-                    if (result != Prop.PropResult.Pending)
-                    {
-                        prop.Result = result;
-                        updated++;
 
-                        if (prop.ParlayId > 0)
-                        {
-                            var parlay = _context.Parlays.FirstOrDefault(p => p.ParlayId == prop.ParlayId);
-                            if (parlay != null) RecalculateParlayResult(parlay);
-                        }
-                    }
+                    if (result == Prop.PropResult.Pending)
+                        continue; // game not played yet — leave as Pending
+
+                    // Mutate the tracked entity directly — EF detects the change automatically
+                    prop.Result = result;
+                    updated++;
                 }
-                catch { /* skip individual failures */ }
+                catch (Exception ex)
+                {
+                    // Log and continue so one bad prop does not block the rest
+                    errors.Add($"Prop #{prop.PropId} ({prop.PlayerFirstName} {prop.PlayerLastName}): {ex.Message}");
+                }
             }
 
+            // Save all prop result changes in one transaction
             _context.SaveChanges();
 
+            // Recalculate affected parlays AFTER SaveChanges so the parlay query
+            // sees the freshly committed prop results, not the pre-save values
+            var affectedParlayIds = pendingProps
+                .Where(p => p.ParlayId > 0 && p.Result != Prop.PropResult.Pending)
+                .Select(p => p.ParlayId)
+                .Distinct()
+                .ToList();
+
+            foreach (var parlayId in affectedParlayIds)
+            {
+                var parlay = _context.Parlays.FirstOrDefault(p => p.ParlayId == parlayId);
+                if (parlay != null)
+                    RecalculateParlayResult(parlay);
+            }
+
+            // Surface any per-prop errors to the UI
+            if (errors.Any())
+                TempData["ErrorMessage"] = $"Errors on {errors.Count} prop(s): {string.Join("; ", errors)}";
+
             TempData["SuccessMessage"] = updated > 0
-                ? $"Checked {pendingProps.Count} pending props — {updated} resolved."
-                : "No pending props could be resolved yet.";
+                ? $"Checked {pendingProps.Count} pending prop(s) — {updated} resolved."
+                : pendingProps.Count == 0
+                    ? "No pending props with a linked player found."
+                    : "All props checked — none resolved yet (games may not have been played).";
 
             return RedirectToAction(nameof(Index));
         }
@@ -245,9 +269,18 @@ namespace PropTracker.Controllers
 
         private void RecalculateParlayResult(Parlay parlay)
         {
+            // Re-query with AsNoTracking so we always get fresh DB values,
+            // not potentially stale cached entities from earlier in the request
             var legProps = _context.Props
+                .AsNoTracking()
                 .Where(p => parlay.PropId.Contains(p.PropId))
                 .ToList();
+
+            if (!legProps.Any())
+            {
+                // No legs found — leave result as-is
+                return;
+            }
 
             if (legProps.Any(p => p.Result == Prop.PropResult.Miss))
             {
@@ -261,6 +294,7 @@ namespace PropTracker.Controllers
             }
             else
             {
+                // Some legs still Pending
                 parlay.Result = Parlay.ParlayResult.Pending;
                 parlay.HitAt = null;
             }

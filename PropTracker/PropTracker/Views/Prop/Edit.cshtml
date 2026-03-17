@@ -503,6 +503,16 @@
                         </div>
                         <span asp-validation-for="PropValue" class="field-validation-error"></span>
                     </div>
+                     <div class="form-group">
+                        <label asp-for="GameDate">Game Date</label>
+                        <input type="date"
+                               id="GameDatePicker"
+                               value="@(Model?.GameDate.HasValue == true ? Model.GameDate.Value.ToString("yyyy-MM-dd") : "")"
+                               onchange="setGameDate(this.value)"
+                               max="@DateTime.Today.AddDays(7).ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="GameDate" class="field-validation-error"></span>
+                        <span style="font-size:11px;color:var(--muted);margin-top:4px;">Used to check the exact game</span>
+                    </div>
                 </div>
 
                 <hr class="divider" />
