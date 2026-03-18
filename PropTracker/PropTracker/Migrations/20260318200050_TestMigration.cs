@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PropTracker.Migrations
 {
     /// <inheritdoc />
-    public partial class AddOverUnderandBdlPlayerId : Migration
+    public partial class TestMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -58,8 +58,8 @@ namespace PropTracker.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Multi = table.Column<double>(type: "float", nullable: false),
                     PropId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Result = table.Column<int>(type: "int", nullable: false),
-                    HitAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Result = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    HitAt = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -180,12 +180,13 @@ namespace PropTracker.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PlayerFirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PlayerLastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PropType = table.Column<int>(type: "int", nullable: false),
+                    PropType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PropValue = table.Column<double>(type: "float", nullable: false),
-                    OverUnder = table.Column<int>(type: "int", nullable: false),
+                    OverUnder = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ParlayId = table.Column<int>(type: "int", nullable: false),
-                    Result = table.Column<int>(type: "int", nullable: false),
-                    BdlPlayerId = table.Column<int>(type: "int", nullable: false),
+                    Result = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EspnPlayerId = table.Column<int>(type: "int", nullable: false),
+                    GameDate = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>

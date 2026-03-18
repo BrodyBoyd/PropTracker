@@ -262,7 +262,7 @@ namespace PropTracker.Migrations
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("BdlPlayerId")
+                    b.Property<int>("EspnPlayerId")
                         .HasColumnType("int");
 
                     b.Property<string>("GameDate")

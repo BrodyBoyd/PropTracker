@@ -62,8 +62,8 @@ builder.Services.AddDistributedMemoryCache();
 // Configure routing before building the app
 builder.Services.AddRouting(options =>
 {
-    options.LowercaseUrls = true;
-    options.AppendTrailingSlash = true;
+    //options.LowercaseUrls = true;
+    //options.AppendTrailingSlash = true;
 });
 
 var app = builder.Build();

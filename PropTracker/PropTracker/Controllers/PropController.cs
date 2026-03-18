@@ -5,10 +5,11 @@ using PropTracker.Services;
 
 namespace PropTracker.Controllers
 {
-    public class PropController(PropContext context, NbaStatsService nbaStats) : Controller
+    public class PropController(PropContext context, NbaStatsService nbaStats, ILogger<PropController> logger) : Controller
     {
         private readonly PropContext _context = context;
         private readonly NbaStatsService _nbaStats = nbaStats;
+        private readonly ILogger<PropController> _logger = logger;
 
         // GET: Prop/Index
         [HttpGet]
@@ -75,9 +76,9 @@ namespace PropTracker.Controllers
             var prop = _context.Props.FirstOrDefault(p => p.PropId == id);
             if (prop == null) return NotFound();
 
-            if (prop.BdlPlayerId > 0)
+            if (prop.EspnPlayerId > 0)
             {
-                try { ViewBag.LastFiveGames = await _nbaStats.GetLastFiveGamesAsync(prop.BdlPlayerId); }
+                try { ViewBag.LastFiveGames = await _nbaStats.GetLastFiveGamesAsync(prop.EspnPlayerId); }
                 catch { ViewBag.LastFiveGames = null; }
             }
 
@@ -102,9 +103,11 @@ namespace PropTracker.Controllers
 
             ModelState.Remove("PropType");
             ModelState.Remove("OverUnder");
+            ModelState.Remove("GameDate");
 
             var propTypeRaw = Request.Form["PropType"].ToString();
             var overUnderRaw = Request.Form["OverUnder"].ToString();
+            var gameDateRaw = Request.Form["GameDate"].ToString();
 
             if (string.IsNullOrWhiteSpace(propTypeRaw))
                 ModelState.AddModelError("PropType", "Please select a prop type.");
@@ -119,6 +122,14 @@ namespace PropTracker.Controllers
                 ModelState.AddModelError("OverUnder", "Invalid Over/Under value.");
             else
                 prop.OverUnder = parsedOu;
+
+            // Parse GameDate from the ISO string the JS hidden field submits
+            if (!string.IsNullOrWhiteSpace(gameDateRaw) &&
+                DateTime.TryParse(gameDateRaw, null,
+                    System.Globalization.DateTimeStyles.RoundtripKind, out var parsedDate))
+                prop.GameDate = parsedDate.ToUniversalTime();
+            else
+                prop.GameDate = null; // field was cleared — remove the date
 
             if (prop.ParlayId < 0)
                 ModelState.AddModelError("ParlayId", "Parlay ID must be a positive number.");
@@ -163,35 +174,48 @@ namespace PropTracker.Controllers
         }
 
         // POST: Prop/CheckPending
-        // Auto-resolves all pending props that have a BdlPlayerId via the BallDontLie API
+        // Auto-resolves all pending props that have a player ID via the NBA.com API
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CheckPending()
         {
             // Pull pending props into memory — EF tracks these objects
             var pendingProps = _context.Props
-                .Where(p => p.Result == Prop.PropResult.Pending && p.BdlPlayerId > 0)
+                .Where(p => p.Result == Prop.PropResult.Pending && p.EspnPlayerId > 0)
                 .ToList();
+
+            if (!pendingProps.Any())
+            {
+                TempData["SuccessMessage"] = "No pending props with a linked player found.";
+                return RedirectToAction(nameof(Index));
+            }
 
             int updated = 0;
             var errors = new List<string>();
 
+            // Hard cap: 15 seconds total — prevents infinite hang if NBA.com is blocking
+            using var overallCts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+
             foreach (var prop in pendingProps)
             {
+                if (overallCts.IsCancellationRequested)
+                {
+                    errors.Add("Timed out after 15s — NBA.com may be blocking server requests.");
+                    break;
+                }
+
                 try
                 {
                     var result = await _nbaStats.CheckPropResultAsync(prop);
 
                     if (result == Prop.PropResult.Pending)
-                        continue; // game not played yet — leave as Pending
+                        continue;
 
-                    // Mutate the tracked entity directly — EF detects the change automatically
                     prop.Result = result;
                     updated++;
                 }
                 catch (Exception ex)
                 {
-                    // Log and continue so one bad prop does not block the rest
                     errors.Add($"Prop #{prop.PropId} ({prop.PlayerFirstName} {prop.PlayerLastName}): {ex.Message}");
                 }
             }
@@ -230,13 +254,29 @@ namespace PropTracker.Controllers
         // GET: Prop/SearchPlayers?name=lebron
         // JSON endpoint for the live player search field on Create/Edit
         [HttpGet]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> SearchPlayers(string name)
         {
-            if (string.IsNullOrWhiteSpace(name) || name.Length < 2)
-                return Json(new List<object>());
+            Response.ContentType = "application/json";
 
             try
             {
+                // No name = return full list for browser-side caching and filtering
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    var all = await _nbaStats.GetAllPlayersAsync();
+                    return Json(all.Select(p => new
+                    {
+                        id = p.Id,
+                        firstName = p.FirstName,
+                        lastName = p.LastName,
+                        team = p.Team
+                    }));
+                }
+
+                if (name.Length < 2)
+                    return Json(new object[] { });
+
                 var players = await _nbaStats.SearchPlayersAsync(name);
                 return Json(players.Select(p => new
                 {
@@ -247,7 +287,11 @@ namespace PropTracker.Controllers
                     display = $"{p.FirstName} {p.LastName} ({p.Team})"
                 }));
             }
-            catch { return Json(new List<object>()); }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "SearchPlayers failed for '{Name}'", name);
+                return Json(new { error = ex.GetType().Name + ": " + ex.Message });
+            }
         }
 
         // POST: Prop/Delete/{id}

@@ -11,12 +11,13 @@
         public int ParlayId { get; set; }
         public PropResult Result { get; set; } = PropResult.Pending;
 
-        // BallDontLie player ID — populated via the player search on the Create/Edit form.
+        // ESPN athlete ID — populated via the player search on the Create/Edit form.
         // Used by NbaStatsService to fetch game logs and auto-check pending props.
-        public int BdlPlayerId { get; set; }
+        // Find a player's ESPN ID at: espn.com/nba/player/_/id/{EspnPlayerId}
+        public int EspnPlayerId { get; set; }
 
-        // The date of the game this prop is for. Used by CheckPropResultAsync to
-        // look up the exact game rather than just the most recent one.
+        // The date of the game this prop is for.
+        // When set, CheckPropResultAsync targets the exact game instead of the most recent one.
         public DateTime? GameDate { get; set; }
 
         public enum BetType
